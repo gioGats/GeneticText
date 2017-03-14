@@ -1,0 +1,4 @@
+# TODO Find text versions of Shakespeare, preferably split by play
+# Place these into GeneticText/plays
+# Then use the GeneticText.to_array() method to convert each play to a numpy array
+# TODO save this numpy array as GeneticText/play_array/PLAYNAME.npy

@@ -1,7 +1,8 @@
-# TODO Pull GA implementation out of AY17-1/CS3610
+import numpy as np
+import random
 # TODO Convert implementation to numpy.array(dtype='uint8')
 # TODO Convert implementation to an interface-inheirtance
-# FUTURE Bit-level implementation
+# FUTURE Replace numpy with a bit level implemenation
 
 
 class GeneticAlgorithm(object):
