@@ -72,7 +72,17 @@ if __name__ == '__main__':
 
         def test_generate_xover(self):
             # TODO Implement test_generate_xover
-            self.fail('Not implemented')
+            sample_population = ['1', '2', '3', '4', '5']
+
+            self.assertRaises(ValueError, lambda: generate_xover(sample_population, midpoint_dist='foobar'))
+            uniform_xover = generate_xover(sample_population, midpoint_dist='uniform')
+            normal_xover = generate_xover(sample_population, midpoint_dist='normal')
+
+            print(uniform_xover, normal_xover)
+
+            # self.assertEqual(test_result.shape, (5,))
+            # self.assertEqual(test_result.dtype, np.float32)
+            # np.testing.assert_array_equal(test_result, solution)
 
         def test_generate_lmutate(self):
             # TODO Implement test_generate_lmutate
