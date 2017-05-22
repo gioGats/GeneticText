@@ -239,35 +239,37 @@ if __name__ == '__main__':
             self.assertEqual(result, 0.5)
 
         def test_probability_selection(self):
-            population1 = [[0.1, 10], [0.1, 20], [0.1, 7], [0.7, 15]]
-            population2 = [[10, 10], [10, 20], [10, 7], [70, 15]]
+            population1 = [[0.1, bitstring.BitArray(bin='00000001')], [0.1, bitstring.BitArray(bin='00000011')],
+                           [0.1, bitstring.BitArray(bin='00000111')], [0.7, bitstring.BitArray(bin='00001111')]]
+            population2 = [[10, bitstring.BitArray(bin='00011111')], [10, bitstring.BitArray(bin='00111111')],
+                           [10, bitstring.BitArray(bin='01111111')], [70, bitstring.BitArray(bin='11111111')]]
 
             self.assertRaises(ValueError, lambda: probability_selection(['notanint', 'notafloat']))
 
             np.random.seed(1)
             result = probability_selection(population1)
             self.assertEqual(type(result), list)
-            self.assertEqual(result[1], 15)
+            self.assertEqual(result[1].bin, '00001111')
 
             np.random.seed(1)
             result = probability_selection(population2)
             self.assertEqual(type(result), list)
-            self.assertEqual(result[1], 15)
+            self.assertEqual(result[1].bin, '11111111')
 
         def test_ranked_selection(self):
             # ISSUE Please confirm if I am testing this correctly.
-            population1 = [[0.8, 10], [0.2, 20]]
-            population2 = [[80, 10], [20, 20]]
+            population1 = [[0.8, bitstring.BitArray(bin='00000001')], [0.2, bitstring.BitArray(bin='11111111')]]
+            population2 = [[80, bitstring.BitArray(bin='00000000')], [20, bitstring.BitArray(bin='11111110')]]
 
             random.seed(1)
             result = probability_selection(population1)
             self.assertEqual(type(result), list)
-            self.assertEqual(result[1], 10)
+            self.assertEqual(result[1].bin, '00000001')
 
             random.seed(1)
             result = probability_selection(population2)
             self.assertEqual(type(result), list)
-            self.assertEqual(result[1], 10)
+            self.assertEqual(result[1].bin, '00000000')
 
         def tearDown(self):
             pass

@@ -72,13 +72,15 @@ if __name__ == '__main__':
 
         def test_generate_xover(self):
             # TODO Implement test_generate_xover
-            sample_population = ['1', '2', '3', '4', '5']
+            population = [[0.8, bitstring.BitArray(bin='00000001')], [0.2, bitstring.BitArray(bin='11111111')]]
+            #population2 = [[10, 10], [10, 20], [10, 7], [70, 15]]
 
-            self.assertRaises(ValueError, lambda: generate_xover(sample_population, midpoint_dist='foobar'))
-            uniform_xover = generate_xover(sample_population, midpoint_dist='uniform')
-            normal_xover = generate_xover(sample_population, midpoint_dist='normal')
+            self.assertRaises(ValueError, lambda: generate_xover(population, midpoint_dist='foobar'))
+            uniform_xover = generate_xover(population, midpoint_dist='uniform')
+            normal_xover = generate_xover(population, midpoint_dist='normal')
 
-            print(uniform_xover, normal_xover)
+            print(uniform_xover)
+            print(normal_xover)
 
             # self.assertEqual(test_result.shape, (5,))
             # self.assertEqual(test_result.dtype, np.float32)
