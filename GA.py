@@ -24,9 +24,9 @@ class GeneticAlgorithm(object):
         self._target_text = target_text
         self._target = str_to_bin(target_text)
         self._chromosome_length = len(self._target)
-        self._current_pop = None  # TODO Set to an empty array of size (_pop_size, len(_target))
-        self._current_pop_scores = None  # TODO Set to an empty array of size (_pop_size,)
-        self._next_pop = None  # TODO Set to an empty array of size (_pop_size, len(_target))
+        self._current_pop = np.empty(shape=(self._pop_size, len(self._target)))
+        self._current_pop_scores = np.empty(shape=(self._pop_size,))
+        self._next_pop = np.empty(shape=(self._pop_size, len(self._target)))
 
     def add_generation_function(self, function, probability):
         self._generate_functions.append([probability, function])
@@ -39,9 +39,10 @@ class GeneticAlgorithm(object):
         """
         Sorts _current_pop and _current_pop_scores in descending order based on _current_pop_scores.
         """
-        # TODO Implement sort_current_pop
         # Must be efficient
-        raise NotImplementedError
+        base = self._current_pop_scores.argsort()[::-1]
+        self._current_pop = self._current_pop[base]
+        self._current_pop_scores = self._current_pop_scores[base]
 
     def score_current_pop(self):
         """
