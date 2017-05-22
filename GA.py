@@ -93,7 +93,7 @@ class GeneticAlgorithm(object):
                       (iteration_count, self.best_candidate_score, improvement), end='')
             if verbosity >= 2 and iteration_count % 10 == 0:
                 makedirs('checkpoints/%s' % str(start_dtg))
-                with open('checkpoints/%s/%d' % (str(start_dtg), iteration_count), 'w') as f:
+                with open('checkpoints/%s/%d.txt' % (str(start_dtg), iteration_count), 'w') as f:
                     f.write('Iteration %8d | Best score: %.8f | Improvement: %.8f\n' %
                             (iteration_count, self.best_candidate_score, improvement))
                     f.write(bin_to_str(self.best_candidate))
