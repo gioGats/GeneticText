@@ -11,9 +11,17 @@ def str_to_bin(string):
     :param string: str to convert
     :return: binary sequence
     """
-    string_bytes = str.encode(string)
-    string_bits = bitstring.Bits(bytes=string_bytes)
-    return string_bits.bin
+    return bitstring.Bits(bytes=str.encode(string)).bin
+
+
+def bin_to_str(bin_sequence):
+    """
+    Converts a binary sequence to a string
+    :param bin_sequence: seq to convert
+    :return: string
+    """
+    # TODO Implement bin_to_str
+    raise NotImplementedError
 
 
 def create_random(n, bits=True):
@@ -26,6 +34,8 @@ def create_random(n, bits=True):
     sequence = ""
     for i in range(0, n):
         sequence += str(random.getrandbits(1))
+        # ISSUE Have not imported random module
+        # ISSUE str(random.getrandbits(1)) returns '1' or '0', not a random character
     if bits:
         string_bits = bitstring.BitArray(bin=sequence)
         return string_bits
@@ -36,7 +46,9 @@ def create_random(n, bits=True):
 def midpoint_xover(a, b, midpoint):
     """
     Do a midpoint crossover of a and b
-    :raises ValueError if len(a) != len(b); ValueError if midpoint is not [0.0, 1.0] or [0, len(a)]
+    :raises ValueError if len(a) != len(b)
+    :raises ValueError if midpoint is not [0.0, 1.0] or [0, len(a)]
+    :raises TypeError if midpoint is not float or int
     :param a: binary sequence
     :param b: binary sequence
     :param midpoint: if float, take first midpoint percent of a and last (1-midpoint) percent of b
@@ -45,37 +57,47 @@ def midpoint_xover(a, b, midpoint):
     """
     if len(a) != len(b):
         raise ValueError('Length mismatch!')
-    if type(midpoint) is float:
+    if isinstance(midpoint, float):
         if not 0.0 <= midpoint <= 1.0:
             raise ValueError('Error in midpoint values!')
-        new_sequence = a[0:int(len(a) * midpoint)]
-        new_sequence += b[int(len(a) * (1 - midpoint)):]
-    if type(midpoint) is int:
+        new_sequence = a[0:int(len(a) * midpoint)] + b[int(len(a) * (1 - midpoint)):]
+    elif isinstance(midpoint, int):
         if not 0 <= midpoint <= len(a):
             raise ValueError('Error in midpoint values!')
-        new_sequence = a[0:midpoint]
-        new_sequence += b[len(b) - midpoint:]
+        new_sequence = a[0:midpoint] + b[len(b) - midpoint:]
+    else:
+        raise TypeError('Midpoint must be float or int, is %s' % str(type(midpoint)))
     return new_sequence
 
 
 def location_mutation(a, start=0, end=None):
     """
     Flips the bits of a between position start and position end
+    :raises ValueError if start >= end
+    :raises TypeError if start or end are not float or int
     :param a: binary sequence
     :param start: int position (or float percentage) to start flipping
     :param end: int position (or float percentage) to stop flipping, set to len(a) if end is None.
     :return: binary sequence
     """
+    # Handle default
+    if end is None:
+        end = len(a)
+    # Type Checking
+    if not (isinstance(start, float) or isinstance(start, int)):
+        raise TypeError('Start must be float or int, is %s' % str(type(start)))
+    if not (isinstance(end, float) or isinstance(end, int)):
+        raise TypeError('End must be float or int, is %s' % str(type(end)))
     if isinstance(start, float):
         start = int(min(max(start, 0.0), 1.0) * len(a))
     if isinstance(end, float):
         end = int(min(max(end, 0.0), 1.0) * len(a))
-    elif end is None:
-        end = len(a)
-    assert start < end
-    copy = a[:]
-    copy.invert(range(start, end))
-    return copy
+    if start < end:
+        copy = a[:]
+        copy.invert(range(start, end))
+        return copy
+    else:
+        raise ValueError('Start(%.2f) >= End(%.2f' % (float(start), float(end)))
 
 
 def probability_mutation(a, pflip, start=0, end=None):
@@ -95,6 +117,7 @@ def probability_mutation(a, pflip, start=0, end=None):
         end = len(a)
     assert start < end
     copy = a[:]
+    # FUTURE Do this without a 'for' loop or make it parallel
     for i in range(start, end):
         if random.random() > pflip:
             copy.invert(i)
@@ -113,33 +136,35 @@ def score_sequence(test, answer):
         raise ValueError('Length mismatch!')
     test_string, answer_string = test.bin, answer.bin
     score = 0
+    # FUTURE Do this without a 'for' loop or make it parallel
     for test_char, answer_char in zip(test_string, answer_string):
         if test_char == answer_char:
             score += 1
     return float(score / len(answer))
 
 
-def probability_selection(population):
+def probability_selection(pop_score_list):
     """
     Selects a value from a population given a probability distribution
-    :param population: iterable of tuples, where [1] is value and [0] is probability of selection
+    :param pop_score_list: iterable of tuples, where [1] is value and [0] is probability of selection
         probabilities must all be ints (relative frequency) or floats (likelihood), else raises ValueError
     :return: value of the selected item
     """
+    # FUTURE Add type checking (all ints or all floats)
     probability_dist = []
-    for i in range(0, len(population)):
-        if type(population[i][0]) is not int and type(population[i][0]) is not float:
+    for i in range(0, len(pop_score_list)):
+        if type(pop_score_list[i][0]) is not int and type(pop_score_list[i][0]) is not float:
             raise ValueError('Probabilities must all be ints or floats!')
-        if type(population[i][0]) is int:
+        if type(pop_score_list[i][0]) is int:
             probability_type = "int"
-            probability_dist.append(population[i][0])
+            probability_dist.append(pop_score_list[i][0])
         else:
             probability_type = "float"
-            probability_dist.append(population[i][0])
+            probability_dist.append(pop_score_list[i][0])
     if probability_type is "int":
         total = sum(probability_dist)
-        probability_dist[:] = [float(x / total) for x in probability_dist]
-    return population[np.random.choice(range(0, len(population)), p=probability_dist)]
+        probability_dist[:] = [float(x / total) for x in probability_dist]  # FUTURE Vectorize this
+    return pop_score_list[np.random.choice(range(0, len(pop_score_list)), p=probability_dist)]
 
 
 def ranked_selection(population):
@@ -164,6 +189,10 @@ if __name__ == '__main__':
             self.assertEqual(len(result), 48)
             self.assertEqual(type(result), str)
             self.assertEqual(result, '011001100110111101101111011000100110000101110010')
+
+        def test_bin_to_str(self):
+            # TODO Implement test_bin_to_str
+            self.fail('Not implemented')
 
         def test_create_random(self):
             result = create_random(8, True)
@@ -258,18 +287,18 @@ if __name__ == '__main__':
 
         def test_ranked_selection(self):
             # ISSUE Please confirm if I am testing this correctly.
-            population1 = [[0.8, bitstring.BitArray(bin='00000001')], [0.2, bitstring.BitArray(bin='11111111')]]
-            population2 = [[80, bitstring.BitArray(bin='00000000')], [20, bitstring.BitArray(bin='11111110')]]
+            population1 = [bitstring.BitArray(bin='00000001'), bitstring.BitArray(bin='11111111')]
+            population2 = [bitstring.BitArray(bin='00000000'), bitstring.BitArray(bin='11111110')]
 
             random.seed(1)
-            result = probability_selection(population1)
-            self.assertEqual(type(result), list)
-            self.assertEqual(result[1].bin, '00000001')
+            result = ranked_selection(population1)
+            self.assertEqual(type(result), bitstring.BitArray)
+            self.assertEqual(result.bin, '00000001')
 
             random.seed(1)
-            result = probability_selection(population2)
-            self.assertEqual(type(result), list)
-            self.assertEqual(result[1].bin, '00000000')
+            result = ranked_selection(population2)
+            self.assertEqual(type(result), bitstring.BitArray)
+            self.assertEqual(result.bin, '00000000')
 
         def tearDown(self):
             pass
