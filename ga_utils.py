@@ -1,5 +1,9 @@
 import numpy as np
 import bitstring
+import random
+import string
+
+import joblib
 
 from random import randint, getrandbits
 
@@ -19,8 +23,7 @@ def bin_to_str(bin_sequence):
     :param bin_sequence: seq to convert
     :return: string
     """
-    # TODO Implement bin_to_str
-    raise NotImplementedError
+    return bin_sequence.tobytes().decode('utf-8')
 
 
 def create_random(n, bits=True):
@@ -32,10 +35,9 @@ def create_random(n, bits=True):
     """
     sequence = ""
     for i in range(0, n):
-        sequence += str(random.getrandbits(1))
-        # ISSUE str(random.getrandbits(1)) returns '1' or '0', not a random ascii character
+        sequence += str(random.choice(string.ascii_lowercase))
     if bits:
-        string_bits = bitstring.BitArray(bin=sequence)
+        string_bits = bitstring.BitArray(bin=str_to_bin(sequence))
         return string_bits
     else:
         return sequence
@@ -116,9 +118,13 @@ def probability_mutation(a, pflip, start=0, end=None):
     assert start < end
     copy = a[:]
     # FUTURE Do this without a 'for' loop or make it parallel
+
+    flip_list = []
     for i in range(start, end):
         if random.random() > pflip:
-            copy.invert(i)
+            flip_list.append(i)
+
+    copy.invert(flip_list)
     return copy
 
 
@@ -189,12 +195,14 @@ if __name__ == '__main__':
             self.assertEqual(result, '011001100110111101101111011000100110000101110010')
 
         def test_bin_to_str(self):
-            # TODO Implement test_bin_to_str
-            self.fail('Not implemented')
+            result = bin_to_str(bitstring.BitArray(bin='011001100110111101101111011000100110000101110010'))
+            self.assertEqual(len(result), 6)
+            self.assertEqual(type(result), str)
+            self.assertEqual(result, 'foobar')
 
         def test_create_random(self):
             result = create_random(8, True)
-            self.assertEqual(len(result), 8)
+            self.assertEqual(len(result), 64)
             self.assertEqual(type(result), bitstring.BitArray)
 
             result = create_random(8, False)
