@@ -1,8 +1,7 @@
-import random
-
 import numpy as np
 import bitstring
-from random import randint
+
+from random import randint, getrandbits
 
 
 def str_to_bin(string):
@@ -34,8 +33,7 @@ def create_random(n, bits=True):
     sequence = ""
     for i in range(0, n):
         sequence += str(random.getrandbits(1))
-        # ISSUE Have not imported random module
-        # ISSUE str(random.getrandbits(1)) returns '1' or '0', not a random character
+        # ISSUE str(random.getrandbits(1)) returns '1' or '0', not a random ascii character
     if bits:
         string_bits = bitstring.BitArray(bin=sequence)
         return string_bits
@@ -268,6 +266,8 @@ if __name__ == '__main__':
             self.assertEqual(result, 0.5)
 
         def test_probability_selection(self):
+            # FUTURE The function is ambiguous as to the type of the actual value,
+            # but in this case, it will be a function from generation_functions
             population1 = [[0.1, bitstring.BitArray(bin='00000001')], [0.1, bitstring.BitArray(bin='00000011')],
                            [0.1, bitstring.BitArray(bin='00000111')], [0.7, bitstring.BitArray(bin='00001111')]]
             population2 = [[10, bitstring.BitArray(bin='00011111')], [10, bitstring.BitArray(bin='00111111')],
@@ -286,7 +286,6 @@ if __name__ == '__main__':
             self.assertEqual(result[1].bin, '11111111')
 
         def test_ranked_selection(self):
-            # ISSUE Please confirm if I am testing this correctly.
             population1 = [bitstring.BitArray(bin='00000001'), bitstring.BitArray(bin='11111111')]
             population2 = [bitstring.BitArray(bin='00000000'), bitstring.BitArray(bin='11111110')]
 
