@@ -66,35 +66,63 @@ def generate_pmutate(population, locate_dist='uniform', pflip_dist='uniform'):
 if __name__ == '__main__':
     import unittest
 
+
     class TestGenFns(unittest.TestCase):
         def setUp(self):
             pass
 
         def test_generate_xover(self):
-            # TODO Implement test_generate_xover
-            population = [[0.8, bitstring.BitArray(bin='00000001')], [0.2, bitstring.BitArray(bin='11111111')]]
-            #population2 = [[10, 10], [10, 20], [10, 7], [70, 15]]
+            population = [bitstring.BitArray(bin='00000001'), bitstring.BitArray(bin='00000011'),
+                          bitstring.BitArray(bin='00000111'), bitstring.BitArray(bin='00001111'),
+                          bitstring.BitArray(bin='00011111'), bitstring.BitArray(bin='00111111'),
+                          bitstring.BitArray(bin='01111111'), bitstring.BitArray(bin='11111111')]
 
-            self.assertRaises(ValueError, lambda: generate_xover(population, midpoint_dist='foobar'))
+            self.assertRaises(ValueError, lambda: generate_xover(population, midpoint_dist='error'))
+
             uniform_xover = generate_xover(population, midpoint_dist='uniform')
             normal_xover = generate_xover(population, midpoint_dist='normal')
 
-            print(uniform_xover)
-            print(normal_xover)
-
-            # self.assertEqual(test_result.shape, (5,))
-            # self.assertEqual(test_result.dtype, np.float32)
-            # np.testing.assert_array_equal(test_result, solution)
+            self.assertEqual(type(uniform_xover), bitstring.BitArray)
+            self.assertEqual(type(normal_xover), bitstring.BitArray)
 
         def test_generate_lmutate(self):
-            # TODO Implement test_generate_lmutate
-            self.fail('Not implemented')
+            population = [bitstring.BitArray(bin='00000001'), bitstring.BitArray(bin='00000011'),
+                          bitstring.BitArray(bin='00000111'), bitstring.BitArray(bin='00001111'),
+                          bitstring.BitArray(bin='00011111'), bitstring.BitArray(bin='00111111'),
+                          bitstring.BitArray(bin='01111111'), bitstring.BitArray(bin='11111111')]
+
+            self.assertRaises(ValueError, lambda: generate_lmutate(population, locate_dist='error'))
+
+            uniform_lmutate = generate_lmutate(population, locate_dist='uniform')
+            normal_lmutate = generate_lmutate(population, locate_dist='normal')
+
+            self.assertEqual(type(uniform_lmutate), bitstring.BitArray)
+            self.assertEqual(type(normal_lmutate), bitstring.BitArray)
 
         def test_generate_pmutate(self):
-            # TODO Implement test_generate_pmutate
-            self.fail('Not implemented')
+            population = [bitstring.BitArray(bin='00000001'), bitstring.BitArray(bin='00000011'),
+                          bitstring.BitArray(bin='00000111'), bitstring.BitArray(bin='00001111'),
+                          bitstring.BitArray(bin='00011111'), bitstring.BitArray(bin='00111111'),
+                          bitstring.BitArray(bin='01111111'), bitstring.BitArray(bin='11111111')]
+
+            self.assertRaises(ValueError,
+                              lambda: generate_pmutate(population, locate_dist='error', pflip_dist='uniform'))
+            self.assertRaises(ValueError,
+                              lambda: generate_pmutate(population, locate_dist='uniform', pflip_dist='error'))
+
+            uu_pmutate = generate_pmutate(population, locate_dist='uniform', pflip_dist='uniform')
+            un_pmutate = generate_pmutate(population, locate_dist='uniform', pflip_dist='normal')
+
+            nu_pmutate = generate_pmutate(population, locate_dist='normal', pflip_dist='uniform')
+            nn_pmutate = generate_pmutate(population, locate_dist='normal', pflip_dist='normal')
+
+            self.assertEqual(type(uu_pmutate), bitstring.BitArray)
+            self.assertEqual(type(un_pmutate), bitstring.BitArray)
+            self.assertEqual(type(nu_pmutate), bitstring.BitArray)
+            self.assertEqual(type(nn_pmutate), bitstring.BitArray)
 
         def tearDown(self):
             pass
+
 
     unittest.main(verbosity=2)
