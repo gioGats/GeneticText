@@ -48,10 +48,12 @@ class GeneticAlgorithm(object):
         """
         Assigns scores for items in _current_pop to the same index in _current_pop_scores.
         """
-        # TODO Implement score_current_pop
         # Must be efficient
-        score_sequence()
-        raise NotImplementedError
+        # ISSUE: Please confirm if this is proper.
+        def score(x):
+            return score_sequence(x, self._target)
+        v_func = np.vectorize(score)
+        self._current_pop_scores = v_func(self._current_pop)
 
     @property
     def best_candidate(self):
