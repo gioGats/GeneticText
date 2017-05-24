@@ -1,6 +1,4 @@
-# TODO Find text versions of Shakespeare, preferably split by play
-# Save these as target_data/plays/play_name.txt
-# Combine them all into a single file too, target_data/plays/shakespeare.txt
+# TODO Combine them all into a single file too, target_data/plays/shakespeare.txt
 
 # TODO Find text versions of Oscar winning screenplays
 # (PDFs @ http://www.simplyscripts.com/oscar_winners.html)

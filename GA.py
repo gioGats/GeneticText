@@ -50,6 +50,7 @@ class GeneticAlgorithm(object):
         """
         # TODO Implement score_current_pop
         # Must be efficient
+        score_sequence()
         raise NotImplementedError
 
     @property
