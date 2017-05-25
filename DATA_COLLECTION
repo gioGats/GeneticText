@@ -1,9 +1,5 @@
 # TODO Combine them all into a single file too, target_data/plays/shakespeare.txt
 
-# TODO Find text versions of Oscar winning screenplays
 # (PDFs @ http://www.simplyscripts.com/oscar_winners.html)
-# Save as target_data/films/film_name.txt
 
-# TODO Find text versions of Grammy winning song lyrics
 # (Videos @ https://www.elephantjournal.com/2016/02/20-great-grammy-winning-song-lyrics-from-the-past-20-years/)
-# Save as target_data/lyrics/song_name.txt
