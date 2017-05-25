@@ -199,6 +199,21 @@ if __name__ == '__main__':
             self.assertEqual(len(result), 6)
             self.assertEqual(type(result), str)
             self.assertEqual(result, 'foobar')
+            # ISSUE Raises AttributeError
+            """
+            ======================================================================
+            ERROR: test_bin_to_str (__main__.TestGAUtils)
+            ----------------------------------------------------------------------
+            Traceback (most recent call last):
+              File "/Users/ryangiarusso/PycharmProjects/GeneticText/ga_utils.py", line 203, in test_bin_to_str
+                self.assertEqual('fubar', bin_to_str(str_to_bin('fubar')))
+              File "/Users/ryangiarusso/PycharmProjects/GeneticText/ga_utils.py", line 26, in bin_to_str
+                return bin_sequence.tobytes().decode('utf-8')
+            AttributeError: 'str' object has no attribute 'tobytes'
+
+            ----------------------------------------------------------------------
+            """
+            self.assertEqual('fubar', bin_to_str(str_to_bin('fubar')))
 
         def test_create_random(self):
             result = create_random(8, True)

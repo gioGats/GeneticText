@@ -24,6 +24,7 @@ class GeneticAlgorithm(object):
         self._target_text = target_text
         self._target = str_to_bin(target_text)
         self._chromosome_length = len(self._target)
+        # TODO Ryan check dtype
         self._current_pop = np.empty(shape=(self._pop_size, len(self._target)))
         self._current_pop_scores = np.empty(shape=(self._pop_size,))
         self._next_pop = np.empty(shape=(self._pop_size, len(self._target)))
@@ -40,6 +41,7 @@ class GeneticAlgorithm(object):
         Sorts _current_pop and _current_pop_scores in descending order based on _current_pop_scores.
         """
         # Must be efficient
+        # TODO Ryan check efficiency
         base = self._current_pop_scores.argsort()[::-1]
         self._current_pop = self._current_pop[base]
         self._current_pop_scores = self._current_pop_scores[base]
@@ -50,6 +52,7 @@ class GeneticAlgorithm(object):
         """
         # Must be efficient
         # ISSUE: Please confirm if this is proper.
+        # TODO Ryan check efficiency
         def score(x):
             return score_sequence(x, self._target)
         v_func = np.vectorize(score)
