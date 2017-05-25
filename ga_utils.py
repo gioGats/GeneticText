@@ -14,7 +14,7 @@ def str_to_bin(string):
     :param string: str to convert
     :return: binary sequence
     """
-    return bitstring.Bits(bytes=str.encode(string)).bin
+    return bitstring.Bits(bytes=str.encode(string))
 
 
 def bin_to_str(bin_sequence):
@@ -37,7 +37,7 @@ def create_random(n, bits=True):
     for i in range(0, n):
         sequence += str(random.choice(string.ascii_lowercase))
     if bits:
-        string_bits = bitstring.BitArray(bin=str_to_bin(sequence))
+        string_bits = bitstring.BitArray(bin=str_to_bin(sequence).bin)
         return string_bits
     else:
         return sequence
@@ -191,14 +191,16 @@ if __name__ == '__main__':
         def test_str_to_bin(self):
             result = str_to_bin('foobar')
             self.assertEqual(len(result), 48)
-            self.assertEqual(type(result), str)
-            self.assertEqual(result, '011001100110111101101111011000100110000101110010')
+            self.assertEqual(type(result), bitstring.Bits)
+            self.assertEqual(result.bin, '011001100110111101101111011000100110000101110010')
+            self.assertEqual(str_to_bin(bin_to_str(bitstring.BitArray(bin='01010000'))).bin, '01010000')
 
         def test_bin_to_str(self):
             result = bin_to_str(bitstring.BitArray(bin='011001100110111101101111011000100110000101110010'))
             self.assertEqual(len(result), 6)
             self.assertEqual(type(result), str)
             self.assertEqual(result, 'foobar')
+            self.assertEqual(bin_to_str(str_to_bin('fubar')), 'fubar')
 
         def test_create_random(self):
             result = create_random(8, True)
