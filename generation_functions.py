@@ -1,5 +1,5 @@
 from ga_utils import *
-from random import randint, gauss, random
+from random import randint, gauss, random, seed
 
 
 def generate_xover(population, midpoint_dist='uniform'):
@@ -79,13 +79,15 @@ if __name__ == '__main__':
 
             self.assertRaises(ValueError, lambda: generate_xover(population, midpoint_dist='error'))
 
+            seed(1)
+
             uniform_xover = generate_xover(population, midpoint_dist='uniform')
             normal_xover = generate_xover(population, midpoint_dist='normal')
 
             self.assertEqual(type(uniform_xover), bitstring.BitArray)
+            self.assertEqual(uniform_xover.bin, '0011')
             self.assertEqual(type(normal_xover), bitstring.BitArray)
-
-            # TODO Can we add some value verification here? (probably using a designated random seed)
+            self.assertEqual(normal_xover.bin, '00000011')
 
         def test_generate_lmutate(self):
             population = [bitstring.BitArray(bin='00000001'), bitstring.BitArray(bin='00000011'),
@@ -95,13 +97,15 @@ if __name__ == '__main__':
 
             self.assertRaises(ValueError, lambda: generate_lmutate(population, locate_dist='error'))
 
+            seed(1)
+
             uniform_lmutate = generate_lmutate(population, locate_dist='uniform')
             normal_lmutate = generate_lmutate(population, locate_dist='normal')
 
             self.assertEqual(type(uniform_lmutate), bitstring.BitArray)
+            self.assertEqual(uniform_lmutate.bin, '01000011')
             self.assertEqual(type(normal_lmutate), bitstring.BitArray)
-
-            # TODO Can we add some value verification here? (probably using a designated random seed)
+            self.assertEqual(normal_lmutate.bin, '11111111')
 
         def test_generate_pmutate(self):
             population = [bitstring.BitArray(bin='00000001'), bitstring.BitArray(bin='00000011'),
@@ -114,6 +118,8 @@ if __name__ == '__main__':
             self.assertRaises(ValueError,
                               lambda: generate_pmutate(population, locate_dist='uniform', pflip_dist='error'))
 
+            seed(2)
+
             uu_pmutate = generate_pmutate(population, locate_dist='uniform', pflip_dist='uniform')
             un_pmutate = generate_pmutate(population, locate_dist='uniform', pflip_dist='normal')
 
@@ -121,12 +127,13 @@ if __name__ == '__main__':
             nn_pmutate = generate_pmutate(population, locate_dist='normal', pflip_dist='normal')
 
             self.assertEqual(type(uu_pmutate), bitstring.BitArray)
+            self.assertEqual(uu_pmutate.bin, '10000111')
             self.assertEqual(type(un_pmutate), bitstring.BitArray)
+            self.assertEqual(un_pmutate.bin, '10011111')
             self.assertEqual(type(nu_pmutate), bitstring.BitArray)
+            self.assertEqual(nu_pmutate.bin, '01000001')
             self.assertEqual(type(nn_pmutate), bitstring.BitArray)
-
-            # TODO Can we add some value verification here? (probably using a designated random seed)
-
+            self.assertEqual(nn_pmutate.bin, '00000110')
 
         def tearDown(self):
             pass
