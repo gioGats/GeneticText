@@ -85,6 +85,8 @@ if __name__ == '__main__':
             self.assertEqual(type(uniform_xover), bitstring.BitArray)
             self.assertEqual(type(normal_xover), bitstring.BitArray)
 
+            # TODO Can we add some value verification here? (probably using a designated random seed)
+
         def test_generate_lmutate(self):
             population = [bitstring.BitArray(bin='00000001'), bitstring.BitArray(bin='00000011'),
                           bitstring.BitArray(bin='00000111'), bitstring.BitArray(bin='00001111'),
@@ -98,6 +100,8 @@ if __name__ == '__main__':
 
             self.assertEqual(type(uniform_lmutate), bitstring.BitArray)
             self.assertEqual(type(normal_lmutate), bitstring.BitArray)
+
+            # TODO Can we add some value verification here? (probably using a designated random seed)
 
         def test_generate_pmutate(self):
             population = [bitstring.BitArray(bin='00000001'), bitstring.BitArray(bin='00000011'),
@@ -120,6 +124,9 @@ if __name__ == '__main__':
             self.assertEqual(type(un_pmutate), bitstring.BitArray)
             self.assertEqual(type(nu_pmutate), bitstring.BitArray)
             self.assertEqual(type(nn_pmutate), bitstring.BitArray)
+
+            # TODO Can we add some value verification here? (probably using a designated random seed)
+
 
         def tearDown(self):
             pass
