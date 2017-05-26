@@ -8,6 +8,10 @@ from datetime import datetime
 
 class GeneticAlgorithm(object):
     def __init__(self, pop_size, generations):
+        """
+        :param pop_size: int
+        :param generations: int
+        """
         self._pop_size = pop_size
         self._generations = generations
 
@@ -21,6 +25,9 @@ class GeneticAlgorithm(object):
         self._next_pop = None
 
     def set_target(self, target_text):
+        """
+        :param target_text: str
+        """
         self._target_text = target_text
         self._target = str_to_bin(target_text)
         self._chromosome_length = len(self._target)
@@ -30,6 +37,10 @@ class GeneticAlgorithm(object):
         self._next_pop = np.empty(shape=(self._pop_size, len(self._target)))
 
     def add_generation_function(self, function, probability):
+        """
+        :param function: callable
+        :param probability: int or float
+        """
         self._generate_functions.append([probability, function])
 
     def default_generation_functions(self):
