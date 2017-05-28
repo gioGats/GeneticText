@@ -54,17 +54,19 @@ class GeneticAlgorithm(object):
         # Must be efficient
         # FUTURE Ryan check efficiency (elevate to T.ODO when unittest complete)
         base = self._current_pop_scores.argsort()[::-1]
-        self._current_pop = self._current_pop[base]
+        self._current_pop = self._current_pop[:, base]
         self._current_pop_scores = self._current_pop_scores[base]
 
     def score_current_pop(self):
         """
         Assigns scores for items in _current_pop to the same index in _current_pop_scores.
         """
+
         # Must be efficient
         # FUTURE Ryan check efficiency (elevate to T.ODO when unittest complete)
         def score(x):
             return score_sequence(x, self._target)
+
         v_func = np.vectorize(score)
         self._current_pop_scores = v_func(self._current_pop)
 
@@ -129,6 +131,7 @@ class GeneticAlgorithm(object):
             else:
                 iteration_count += 1
 
+
 if __name__ == '__main__':
     # TODO Implement a unittest.TestCase for GeneticAlgorithm and test the methods:
     import unittest
@@ -139,20 +142,67 @@ if __name__ == '__main__':
             pass
 
         def test_init(self):
-            # TODO implement test_init
-            self.fail('Not implemented')
+            ga = GeneticAlgorithm(pop_size=8, generations=4)
+
+            self.assertEqual(type(ga._pop_size), int)
+            self.assertEqual(ga._pop_size, 8)
+            self.assertEqual(type(ga._generations), int)
+            self.assertEqual(ga._generations, 4)
+            self.assertEqual(type(ga._generate_functions), list)
+            self.assertEqual(ga._generate_functions, [])
+            self.assertEqual(ga._target_text, None)
+            self.assertEqual(ga._target, None)
+            self.assertEqual(ga._chromosome_length, None)
+            self.assertEqual(ga._current_pop, None)
+            self.assertEqual(ga._current_pop_scores, None)
+            self.assertEqual(ga._next_pop, None)
 
         def test_set_target(self):
-            # TODO implement test_set_target
-            self.fail('Not implemented')
+            ga = GeneticAlgorithm(pop_size=8, generations=4)
+            ga.set_target('hi')
+
+            self.assertEqual(ga._target_text, 'hi')
+            self.assertEqual(type(ga._target_text), str)
+            self.assertEqual(ga._target.bin, '0110100001101001')
+            self.assertEqual(type(ga._target), bitstring.BitArray)
+            self.assertEqual(ga._chromosome_length, 16)
+            self.assertEqual(type(ga._chromosome_length), int)
+            self.assertEqual(ga._current_pop.shape, (8, 16))
+            self.assertEqual(type(ga._current_pop), np.ndarray)
+            self.assertEqual(ga._current_pop_scores.shape, (8,))
+            self.assertEqual(type(ga._current_pop_scores), np.ndarray)
+            self.assertEqual(ga._next_pop.shape, (8, 16))
+            self.assertEqual(type(ga._next_pop), np.ndarray)
 
         def test_sort_current_pop(self):
-            # TODO implement test_sort_current_pop
-            self.fail('Not implemented')
+            ga = GeneticAlgorithm(pop_size=8, generations=4)
+            ga._current_pop = np.array(
+                [['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'], ['i', 'j', 'k', 'l', 'm', 'n', 'o', 'p']])
+            ga._current_pop_scores = np.arange(1, 9)
+            ga.sort_current_pop()
+
+            np.testing.assert_array_equal(ga._current_pop, np.array(
+                [['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'], ['p', 'o', 'n', 'm', 'l', 'k', 'j', 'i']]))
+            self.assertEqual(type(ga._current_pop), np.ndarray)
+            np.testing.assert_array_equal(ga._current_pop_scores, np.array(
+                [8, 7, 6, 5, 4, 3, 2, 1]))
+            self.assertEqual(type(ga._current_pop_scores), np.ndarray)
+            # ISSUE Ryan, please verify that this is the correct equals value
 
         def test_score_current_pop(self):
-            # TODO implement test_score_current_pop
-            self.fail('Not implemented')
+            ga = GeneticAlgorithm(pop_size=4, generations=4)
+            ga._target = bitstring.BitArray(bin='0000')
+            ga._current_pop = np.array(
+                [[bitstring.BitArray(bin='0000'), bitstring.BitArray(bin='1111'), bitstring.BitArray(bin='1001'),
+                  bitstring.BitArray(bin='0110')],
+                 [bitstring.BitArray(bin='0001'), bitstring.BitArray(bin='0011'), bitstring.BitArray(bin='0111'),
+                  bitstring.BitArray(bin='1110')]], dtype=bitstring.BitArray)
+            print(ga._current_pop)
+            ga.score_current_pop()
+
+            np.testing.assert_array_equal(ga._current_pop_scores, np.array(
+                [8, 7, 6, 5, 4, 3, 2, 1]))
+            self.assertEqual(type(ga._current_pop_scores), np.ndarray)
 
         def test_best_candidate(self):
             # TODO implement test_best_candidate
@@ -196,4 +246,5 @@ if __name__ == '__main__':
             """
             self.fail('Not implemented')
 
-    raise NotImplementedError
+
+    unittest.main(verbosity=2)

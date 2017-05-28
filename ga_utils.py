@@ -12,7 +12,7 @@ def str_to_bin(string):
     :param string: str to convert
     :return: binary sequence
     """
-    return bitstring.Bits(bytes=str.encode(string))
+    return bitstring.BitArray(bytes=str.encode(string))
 
 
 def bin_to_str(bin_sequence):
@@ -189,7 +189,7 @@ if __name__ == '__main__':
         def test_str_to_bin(self):
             result = str_to_bin('foobar')
             self.assertEqual(len(result), 48)
-            self.assertEqual(type(result), bitstring.Bits)
+            self.assertEqual(type(result), bitstring.BitArray)
             self.assertEqual(result.bin, '011001100110111101101111011000100110000101110010')
             self.assertEqual(str_to_bin(bin_to_str(bitstring.BitArray(bin='01010000'))).bin, '01010000')
 
