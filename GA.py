@@ -196,8 +196,8 @@ if __name__ == '__main__':
                 [[bitstring.BitArray(bin='0000'), bitstring.BitArray(bin='1111'), bitstring.BitArray(bin='1001'),
                   bitstring.BitArray(bin='0110')],
                  [bitstring.BitArray(bin='0001'), bitstring.BitArray(bin='0011'), bitstring.BitArray(bin='0111'),
-                  bitstring.BitArray(bin='1110')]], dtype=bitstring.BitArray)
-            print(ga._current_pop)
+                  bitstring.BitArray(bin='1110')]])
+
             ga.score_current_pop()
 
             np.testing.assert_array_equal(ga._current_pop_scores, np.array(
