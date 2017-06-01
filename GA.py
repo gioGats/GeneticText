@@ -5,6 +5,8 @@ from time import time
 from os import makedirs
 from datetime import datetime
 
+# ISSUE Remove any numpy usages
+
 
 class GeneticAlgorithm(object):
     def __init__(self, pop_size, generations):

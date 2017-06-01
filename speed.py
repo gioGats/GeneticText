@@ -4,6 +4,9 @@ from random import getrandbits
 from timeit import timeit
 
 VFUNC = None
+# FUTURE Convert to a bitstring only testing script
+# This will help measure incremental performance improvements of underlying functions if necessary later.
+
 
 def numpy_func(arr):
     for i in range(0, len(arr)):
@@ -13,10 +16,7 @@ def numpy_func(arr):
 
 
 def numpy_vfunc(x):
-    if x is True:
-        return False
-    if x is False:
-        return True
+    return not x
 
 
 def py_func(arr):
@@ -59,8 +59,8 @@ class TestRunner(object):
             self.pyarray.append(bitstring.BitArray(bin=generate_binary(1000)))
         print('python memsize:', sys.getsizeof(self.pyarray), 'bytes')
 
-        print('numpy with for loop:',
-              timeit(self.numpy_func_timer, number=1), 'seconds')
+        #print('numpy with for loop:',
+        #      timeit(self.numpy_func_timer, number=1), 'seconds')
 
         self.numpyarray2 = self.numpyarray[:]
 
@@ -81,8 +81,8 @@ class TestRunner(object):
             self.pyarray.append(bitstring.BitArray(bin=generate_binary(1000)))
         print('python memsize:', sys.getsizeof(self.pyarray), 'bytes')
 
-        print('numpy with for loop:',
-              timeit(self.numpy_func_timer, number=1), 'seconds')
+        #print('numpy with for loop:',
+        #      timeit(self.numpy_func_timer, number=1), 'seconds')
 
         self.numpyarray2 = self.numpyarray[:]
 
@@ -103,8 +103,8 @@ class TestRunner(object):
             self.pyarray.append(bitstring.BitArray(bin=generate_binary(1000)))
         print('python memsize:', sys.getsizeof(self.pyarray), 'bytes')
 
-        print('numpy with for loop:',
-              timeit(self.numpy_func_timer, number=1), 'seconds')
+        #print('numpy with for loop:',
+        #      timeit(self.numpy_func_timer, number=1), 'seconds')
 
         self.numpyarray2 = self.numpyarray[:]
 
@@ -125,8 +125,8 @@ class TestRunner(object):
             self.pyarray.append(bitstring.BitArray(bin=generate_binary(1000000)))
         print('python memsize:', sys.getsizeof(self.pyarray), 'bytes')
 
-        print('numpy with for loop:',
-              timeit(self.numpy_func_timer, number=1), 'seconds')
+        #print('numpy with for loop:',
+        #      timeit(self.numpy_func_timer, number=1), 'seconds')
 
         self.numpyarray2 = self.numpyarray[:]
 
@@ -147,8 +147,8 @@ class TestRunner(object):
             self.pyarray.append(bitstring.BitArray(bin=generate_binary(1000000)))
         print('python memsize:', sys.getsizeof(self.pyarray), 'bytes')
 
-        print('numpy with for loop:',
-              timeit(self.numpy_func_timer, number=1), 'seconds')
+        #print('numpy with for loop:',
+        #      timeit(self.numpy_func_timer, number=1), 'seconds')
 
         self.numpyarray2 = self.numpyarray[:]
 
@@ -169,8 +169,8 @@ class TestRunner(object):
             self.pyarray.append(bitstring.BitArray(bin=generate_binary(1000000)))
         print('python memsize:', sys.getsizeof(self.pyarray), 'bytes')
 
-        print('numpy with for loop:',
-              timeit(self.numpy_func_timer, number=1), 'seconds')
+        #print('numpy with for loop:',
+        #     timeit(self.numpy_func_timer, number=1), 'seconds')
 
         self.numpyarray2 = self.numpyarray[:]
 
