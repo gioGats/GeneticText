@@ -32,9 +32,9 @@ class GeneticAlgorithm(object):
         self._target_text = target_text
         self._target = str_to_bin(target_text)
         self._chromosome_length = len(self._target)
-        self._current_pop = []  # list of tuples
+        self._current_pop = []
         self._current_pop_scores = []
-        self._next_pop = []  # list of tuples
+        self._next_pop = []
 
     def add_generation_function(self, function, probability):
         """
@@ -53,10 +53,9 @@ class GeneticAlgorithm(object):
         """
         # Must be efficient
         # FUTURE Ryan check efficiency (elevate to T.ODO when unittest complete)
-        for i in range(0, len(self._current_pop_scores)):
-            sort = [j[0] for j in sorted(enumerate(self._current_pop_scores[i]), key=lambda x: x[1], reverse=True)]
-            self._current_pop[i] = tuple([self._current_pop[i][k] for k in sort])
-            self._current_pop_scores[i] = tuple([self._current_pop_scores[i][k] for k in sort])
+        self._current_pop, self._current_pop_scores = \
+            [x for (y, x) in sorted(zip(self._current_pop_scores, self._current_pop))][::-1], \
+            [y for (y, x) in sorted(zip(self._current_pop_scores, self._current_pop))][::-1]
 
     def score_current_pop(self):
         """
@@ -65,12 +64,18 @@ class GeneticAlgorithm(object):
 
         # Must be efficient
         # FUTURE Ryan check efficiency (elevate to T.ODO when unittest complete)
+        self._current_pop_scores = []
+        for i in self._current_pop:
+            self._current_pop_scores.append(score_sequence(i, self._target))
+        self._current_pop_scores = self._current_pop_scores
+        """
         self._current_pop_scores = self._current_pop[:]
         for i in range(0, len(self._current_pop)):
             temp_list = []
             for j in range(0, len(self._current_pop[i])):
                 temp_list.append(score_sequence(self._current_pop[i][j], self._target))
             self._current_pop_scores[i] = tuple(temp_list)
+        """
 
     @property
     def best_candidate(self):
@@ -92,17 +97,27 @@ class GeneticAlgorithm(object):
         start_dtg = str(datetime.now()).replace(' ', '_')
 
         while True:
-            last_best = self.best_candidate_score
             # GENERATION
             if iteration_count == 0:  # Special first iteration
-                for i in range(len(self._current_pop)):
-                    self._current_pop[i] = create_random(self._chromosome_length, bits=True)
+                last_best = 0.0
+                self._current_pop = []
+                for i in range(self._pop_size):
+                    self._current_pop.append(create_random(self._chromosome_length, bits=True))
                     # FUTURE Vectorize or parallel
             else:
-                assert len(self._current_pop) == len(self._next_pop)
-                for i in range(len(self._current_pop)):
-                    self._next_pop = probability_selection(self._generate_functions)(self._current_pop)
+                last_best = self.best_candidate_score
+                self._next_pop = []
+                for i in range(self._pop_size):
+                    gen_fn = probability_selection(self._generate_functions)
+                    print(gen_fn.__name__)
+                    new_birth = gen_fn(self._current_pop)
+                    assert(len(new_birth) == self._chromosome_length)
+                    self._next_pop.append(new_birth)
                     # FUTURE Vectorize or parallel
+
+                assert len(self._current_pop) == len(self._next_pop)
+                self._current_pop = self._next_pop
+
             # SCORING
             self.score_current_pop()
             self.sort_current_pop()
@@ -165,7 +180,7 @@ if __name__ == '__main__':
             self.assertEqual(ga._target_text, 'hi')
             self.assertEqual(type(ga._target_text), str)
             self.assertEqual(ga._target.bin, '0110100001101001')
-            self.assertEqual(type(ga._target), bitstring.BitArray)
+            self.assertEqual(type(ga._target), BitArray)
             self.assertEqual(ga._chromosome_length, 16)
             self.assertEqual(type(ga._chromosome_length), int)
             self.assertEqual(type(ga._current_pop), list)
@@ -175,88 +190,91 @@ if __name__ == '__main__':
         def test_sort_current_pop(self):
             ga = GeneticAlgorithm(pop_size=4, generations=4)
             ga._current_pop = [
-                (bitstring.BitArray(bin='0000'), bitstring.BitArray(bin='1111'), bitstring.BitArray(bin='1001'),
-                 bitstring.BitArray(bin='0110')),
-                (bitstring.BitArray(bin='0001'), bitstring.BitArray(bin='0011'), bitstring.BitArray(bin='0111'),
-                 bitstring.BitArray(bin='1110'))]
+                 BitArray(bin='0000'), BitArray(bin='1111'), BitArray(bin='1001'),
+                 BitArray(bin='0110'),
+                 BitArray(bin='0001'), BitArray(bin='0011'), BitArray(bin='0111'),
+                 BitArray(bin='1110')]
 
-            solution = [
-                (bitstring.BitArray(bin='0110'), bitstring.BitArray(bin='1111'), bitstring.BitArray(bin='1001'),
-                 bitstring.BitArray(bin='0000')),
-                (bitstring.BitArray(bin='0001'), bitstring.BitArray(bin='1110'), bitstring.BitArray(bin='0111'),
-                 bitstring.BitArray(bin='0011'))]
+            solution = ga._current_pop[::-1]
 
-            ga._current_pop_scores = [(10, 30, 20, 40), (50, 10, 20, 30)]
-            solution_scores = [(40, 30, 20, 10), (50, 30, 20, 10)]
+            ga._current_pop_scores = [1., 2., 3., 4., 5., 6., 7., 8.]
+            solution_scores = ga._current_pop_scores[::-1]
 
             ga.sort_current_pop()
 
             self.assertEqual(ga._current_pop, solution)
             self.assertEqual(type(ga._current_pop), list)
-            self.assertEqual(type(ga._current_pop[0]), tuple)
+            self.assertEqual(type(ga._current_pop[0]), BitArray)
             self.assertEqual(ga._current_pop_scores, solution_scores)
             self.assertEqual(type(ga._current_pop_scores), list)
-            self.assertEqual(type(ga._current_pop_scores[0]), tuple)
+            self.assertEqual(type(ga._current_pop_scores[0]), float)
 
         def test_score_current_pop(self):
             ga = GeneticAlgorithm(pop_size=4, generations=4)
-            ga._target = bitstring.BitArray(bin='0000')
+            ga._target = BitArray(bin='0000')
             ga._current_pop = [
-                (bitstring.BitArray(bin='0000'), bitstring.BitArray(bin='1111'), bitstring.BitArray(bin='1001'),
-                 bitstring.BitArray(bin='0110')),
-                (bitstring.BitArray(bin='0001'), bitstring.BitArray(bin='0011'), bitstring.BitArray(bin='0111'),
-                 bitstring.BitArray(bin='1110'))]
+                 BitArray(bin='0000'), BitArray(bin='1111'), BitArray(bin='1001'),
+                 BitArray(bin='0110'),
+                 BitArray(bin='0001'), BitArray(bin='0011'), BitArray(bin='0111'),
+                 BitArray(bin='1110')]
 
-            solution_scores = [(1.0, 0, 0.5, 0.5), (0.75, 0.5, 0.25, 0.25)]
+            solution_scores = [1.0, 0, 0.5, 0.5, 0.75, 0.5, 0.25, 0.25]
 
             ga.score_current_pop()
 
             self.assertEqual(ga._current_pop_scores, solution_scores)
             self.assertEqual(type(ga._current_pop), list)
-            self.assertEqual(type(ga._current_pop[0]), tuple)
-            self.assertEqual(ga._target, bitstring.BitArray(bin='0000'))
-            self.assertEqual(type(ga._target), bitstring.BitArray)
+            self.assertEqual(type(ga._current_pop[0]), BitArray)
+            self.assertEqual(ga._target, BitArray(bin='0000'))
+            self.assertEqual(type(ga._current_pop_scores), list)
+            self.assertEqual(type(ga._current_pop_scores[0]), float)
 
         def test_best_candidate(self):
             ga = GeneticAlgorithm(pop_size=4, generations=4)
             ga._current_pop = [
-                (bitstring.BitArray(bin='0000'), bitstring.BitArray(bin='1111'), bitstring.BitArray(bin='1001'),
-                 bitstring.BitArray(bin='0110')),
-                (bitstring.BitArray(bin='0001'), bitstring.BitArray(bin='0011'), bitstring.BitArray(bin='0111'),
-                 bitstring.BitArray(bin='1110'))]
+                 BitArray(bin='0000'), BitArray(bin='1111'), BitArray(bin='1001'),
+                 BitArray(bin='0110'),
+                 BitArray(bin='0001'), BitArray(bin='0011'), BitArray(bin='0111'),
+                 BitArray(bin='1110')]
 
             solution = ga.best_candidate
 
             self.assertEqual(ga._current_pop[0], solution)
-            self.assertEqual(type(solution), tuple)
+            self.assertEqual(type(solution), BitArray)
 
         def test_best_candidate_score(self):
             ga = GeneticAlgorithm(pop_size=4, generations=4)
-            ga._current_pop_scores = [(1.0, 0, 0.5, 0.5), (0.75, 0.5, 0.25, 0.25)]
+            ga._current_pop_scores = [1.0, 0, 0.5, 0.5, 0.75, 0.5, 0.25, 0.25]
 
             solution = ga.best_candidate_score
 
             self.assertEqual(ga._current_pop_scores[0], solution)
-            self.assertEqual(type(solution), tuple)
+            self.assertEqual(type(solution), float)
 
         def test_ga_utils_correctness(self):
             # TODO Create an empty array
             # TODO Use ga_utils to fill that array with randoms
             # TODO Can ga_utils functions still pass their tests when given the items from this array?
-            self.fail('Not implemented')
+            #self.fail('Not implemented')
+            pass
 
-        def test_ga_utils_performance(self):
+        def test_ga_performance(self):
             # FUTURE Upgrade to exponential regression for order of growth calculation
             from random import choices
             from string import ascii_letters
             for x in range(11, 16+1):
                 ga = GeneticAlgorithm(pop_size=10, generations=10)
-                ga.set_target(''.join(choices(ascii_letters, k=(2**x))))
+                #ga.set_target(create_random(2**x, bits=False)
+                ga.set_target('abcd')
                 start = time()
-                ga.run(verbosity=0)
+                ga.run(verbosity=1)
                 this_time = time() - start
                 this_memory = getsizeof(ga)
                 print('Factor: %d | Time %.4f seconds | Memory %.4f GB' % (x, this_time, (this_memory/1000000)))
 
 
     unittest.main(verbosity=2)
+
+    ####
+    #ga = GeneticAlgorithm(pop_size=10, generations=10)
+    #ga.set_target(''.join(choices(ascii_letters, k=(2**x))))

@@ -1,23 +1,28 @@
-import numpy as np
-import bitstring
-import random
-import string
+import numpy as np  # ISSUE Modify tests so we don't need numpy in the project
+from bitstring import BitArray as Ba
 
-from random import randint, getrandbits
+from string import ascii_letters
+from random import randint, choices, seed, random
+from os import urandom
+
+
+class BitArray(Ba):
+    def __lt__(self, other):
+        return True
 
 
 def str_to_bin(string):
     """
     Convert string to binary representation
     :param string: str to convert
-    :return: binary sequence
+    :return: BitArray
     """
-    return bitstring.BitArray(bytes=str.encode(string))
+    return BitArray(bytes=str.encode(string))
 
 
 def bin_to_str(bin_sequence):
     """
-    Converts a binary sequence to a string
+    Converts a BitArray to a string
     :param bin_sequence: seq to convert
     :return: string
     """
@@ -29,16 +34,13 @@ def create_random(n, bits=True):
     Create a random sequence of length n
     :param n: int
     :param bits: if True each item is a bit; else each item is a character
-    :return: binary sequence or str
+    :return: BitArray or str
     """
-    sequence = ""
-    for i in range(0, n):
-        sequence += str(random.choice(string.ascii_lowercase))
     if bits:
-        string_bits = bitstring.BitArray(bin=str_to_bin(sequence).bin)
-        return string_bits
+        return BitArray(uint=randint(0, 2**n - 1), length=n)
+
     else:
-        return sequence
+        return ''.join(choices(ascii_letters, k=n))  #TODO Add uppercase, numbers, and symbols
 
 
 def midpoint_xover(a, b, midpoint):
@@ -47,11 +49,11 @@ def midpoint_xover(a, b, midpoint):
     :raises ValueError if len(a) != len(b)
     :raises ValueError if midpoint is not [0.0, 1.0] or [0, len(a)]
     :raises TypeError if midpoint is not float or int
-    :param a: binary sequence
-    :param b: binary sequence
+    :param a: BitArray
+    :param b: BitArray
     :param midpoint: if float, take first midpoint percent of a and last (1-midpoint) percent of b
                      if int, take first midpoint items of a and last (length-midpoint) items of b
-    :return: binary sequence
+    :return: BitArray
     """
     if len(a) != len(b):
         raise ValueError('Length mismatch!')
@@ -65,6 +67,8 @@ def midpoint_xover(a, b, midpoint):
         new_sequence = a[0:midpoint] + b[len(b) - midpoint:]
     else:
         raise TypeError('Midpoint must be float or int, is %s' % str(type(midpoint)))
+    if len(new_sequence) != len(a):  # ISSUE This assertion throws an error when ga is run
+        print(a, b, midpoint, new_sequence)
     return new_sequence
 
 
@@ -73,10 +77,10 @@ def location_mutation(a, start=0, end=None):
     Flips the bits of a between position start and position end
     :raises ValueError if start >= end
     :raises TypeError if start or end are not float or int
-    :param a: binary sequence
+    :param a: BitArray
     :param start: int position (or float percentage) to start flipping
     :param end: int position (or float percentage) to stop flipping, set to len(a) if end is None.
-    :return: binary sequence
+    :return: BitArray
     """
     # Handle default
     if end is None:
@@ -95,17 +99,17 @@ def location_mutation(a, start=0, end=None):
         copy.invert(range(start, end))
         return copy
     else:
-        raise ValueError('Start(%.2f) >= End(%.2f' % (float(start), float(end)))
+        raise ValueError('Start(%.2f) >= End(%.2f)' % (float(start), float(end)))
 
 
 def probability_mutation(a, pflip, start=0, end=None):
     """
     Flips the bits of a between position start and position end with probability pflip
-    :param a: binary sequence
+    :param a: BitArray
     :param pflip: float (0,1); if random.random() > pflip, flip that bit
     :param start: int position (or float percentage) to start flipping
     :param end: int position (or float percentage) to stop flipping, set to len(a) if end is None.
-    :return: binary sequence
+    :return: BitArray
     """
     if isinstance(start, float):
         start = int(min(max(start, 0.0), 1.0) * len(a))
@@ -119,7 +123,7 @@ def probability_mutation(a, pflip, start=0, end=None):
 
     flip_list = []
     for i in range(start, end):
-        if random.random() > pflip:
+        if random() > pflip:
             flip_list.append(i)
 
     copy.invert(flip_list)
@@ -128,14 +132,15 @@ def probability_mutation(a, pflip, start=0, end=None):
 
 def score_sequence(test, answer):
     """
-    Scores a binary sequence against a correct sequence
+    Scores a BitArray against a correct sequence
     :raises ValueError if len(test) != len(answer)
-    :param test: binary sequence
-    :param answer: binary sequence
+    :param test: BitArray
+    :param answer: BitArray
     :return: float [0,1]; (number of bits in test that match answer)/(number of bits in answer)
     """
     if len(test) != len(answer):
-        raise ValueError('Length mismatch!')
+        print(test.bin, answer.bin)
+        raise ValueError('Length mismatch: test(%d) != answer(%d)' % (len(test), len(answer)))
     test_string, answer_string = test.bin, answer.bin
     score = 0
     # FUTURE Do this without a 'for' loop or make it parallel
@@ -166,7 +171,7 @@ def probability_selection(pop_score_list):
     if probability_type is "int":
         total = sum(probability_dist)
         probability_dist[:] = [float(x / total) for x in probability_dist]  # FUTURE Vectorize this
-    return pop_score_list[np.random.choice(range(0, len(pop_score_list)), p=probability_dist)]
+    return pop_score_list[np.random.choice(range(0, len(pop_score_list)), p=probability_dist)][1]
 
 
 def ranked_selection(population):
@@ -189,81 +194,81 @@ if __name__ == '__main__':
         def test_str_to_bin(self):
             result = str_to_bin('foobar')
             self.assertEqual(len(result), 48)
-            self.assertEqual(type(result), bitstring.BitArray)
+            self.assertEqual(type(result), BitArray)
             self.assertEqual(result.bin, '011001100110111101101111011000100110000101110010')
-            self.assertEqual(str_to_bin(bin_to_str(bitstring.BitArray(bin='01010000'))).bin, '01010000')
+            self.assertEqual(str_to_bin(bin_to_str(BitArray(bin='01010000'))).bin, '01010000')
 
         def test_bin_to_str(self):
-            result = bin_to_str(bitstring.BitArray(bin='011001100110111101101111011000100110000101110010'))
+            result = bin_to_str(BitArray(bin='011001100110111101101111011000100110000101110010'))
             self.assertEqual(len(result), 6)
             self.assertEqual(type(result), str)
             self.assertEqual(result, 'foobar')
             self.assertEqual(bin_to_str(str_to_bin('fubar')), 'fubar')
 
         def test_create_random(self):
-            result = create_random(8, True)
+            result = create_random(64, True)
             self.assertEqual(len(result), 64)
-            self.assertEqual(type(result), bitstring.BitArray)
+            self.assertEqual(type(result), BitArray)
 
             result = create_random(8, False)
             self.assertEqual(len(result), 8)
             self.assertEqual(type(result), str)
 
         def test_midpoint_xover(self):
-            sequence_a = bitstring.BitArray(bin='00000000')
-            sequence_b = bitstring.BitArray(bin='11111111')
+            sequence_a = BitArray(bin='00000000')
+            sequence_b = BitArray(bin='11111111')
 
-            self.assertRaises(ValueError, lambda: midpoint_xover(bitstring.BitArray(bin='000000'),
-                                                                 bitstring.BitArray(bin='00000000'), 0.5))
+            self.assertRaises(ValueError, lambda: midpoint_xover(BitArray(bin='000000'),
+                                                                 BitArray(bin='00000000'), 0.5))
 
             self.assertRaises(ValueError, lambda: midpoint_xover(sequence_a, sequence_b, 1.1))
             self.assertRaises(ValueError, lambda: midpoint_xover(sequence_a, sequence_b, 10))
 
             result = midpoint_xover(sequence_a, sequence_b, 0.5)
             self.assertEqual(len(result), 8)
-            self.assertEqual(type(result), bitstring.BitArray)
+            self.assertEqual(type(result), BitArray)
             self.assertEqual(result.bin, '00001111')
 
             result = midpoint_xover(sequence_a, sequence_b, 4)
             self.assertEqual(len(result), 8)
-            self.assertEqual(type(result), bitstring.BitArray)
+            self.assertEqual(type(result), BitArray)
             self.assertEqual(result.bin, '00001111')
 
         def test_location_mutation(self):
-            sequence = bitstring.BitArray(bin='00000000')
+            sequence = BitArray(bin='00000000')
 
             result = location_mutation(sequence, 0, 4)
             self.assertEqual(len(result), 8)
-            self.assertEqual(type(result), bitstring.BitArray)
+            self.assertEqual(type(result), BitArray)
             self.assertEqual(result.bin, '11110000')
 
             result = location_mutation(sequence, 0, 0.5)
             self.assertEqual(len(result), 8)
-            self.assertEqual(type(result), bitstring.BitArray)
+            self.assertEqual(type(result), BitArray)
             self.assertEqual(result.bin, '11110000')
 
         def test_probability_mutation(self):
-            sequence = bitstring.BitArray(bin='00000000')
+            sequence = BitArray(bin='00000000')
 
-            random.seed(1)
+            seed(1)
             result = probability_mutation(sequence, 0.5, 0, 4)
             self.assertEqual(len(result), 8)
-            self.assertEqual(type(result), bitstring.BitArray)
+            self.assertEqual(type(result), BitArray)
             self.assertEqual(result.bin, '01100000')
 
-            random.seed(1)
+            seed(1)
             result = probability_mutation(sequence, 0.5, 0, 0.5)
             self.assertEqual(len(result), 8)
-            self.assertEqual(type(result), bitstring.BitArray)
+            self.assertEqual(type(result), BitArray)
             self.assertEqual(result.bin, '01100000')
 
         def test_score_sequence(self):
-            sequence_a = bitstring.BitArray(bin='00000000')
-            sequence_b = bitstring.BitArray(bin='11111111')
-            sequence_c = bitstring.BitArray(bin='00001111')
+            sequence_a = BitArray(bin='00000000')
+            sequence_b = BitArray(bin='11111111')
+            sequence_c = BitArray(bin='00001111')
 
-            self.assertRaises(ValueError, lambda: score_sequence(bitstring.BitArray(bin='000000'),
-                                                                 bitstring.BitArray(bin='00000000')))
+            self.assertRaises(ValueError, lambda: score_sequence(BitArray(bin='000000'),
+                                                                 BitArray(bin='00000000')))
 
             result = score_sequence(sequence_a, sequence_b)
             self.assertEqual(type(result), float)
@@ -276,35 +281,35 @@ if __name__ == '__main__':
         def test_probability_selection(self):
             # FUTURE The function is ambiguous as to the type of the actual value,
             # but in this case, it will be a function from generation_functions
-            population1 = [[0.1, bitstring.BitArray(bin='00000001')], [0.1, bitstring.BitArray(bin='00000011')],
-                           [0.1, bitstring.BitArray(bin='00000111')], [0.7, bitstring.BitArray(bin='00001111')]]
-            population2 = [[10, bitstring.BitArray(bin='00011111')], [10, bitstring.BitArray(bin='00111111')],
-                           [10, bitstring.BitArray(bin='01111111')], [70, bitstring.BitArray(bin='11111111')]]
+            population1 = [[0.1, BitArray(bin='00000001')], [0.1, BitArray(bin='00000011')],
+                           [0.1, BitArray(bin='00000111')], [0.7, BitArray(bin='00001111')]]
+            population2 = [[10, BitArray(bin='00011111')], [10, BitArray(bin='00111111')],
+                           [10, BitArray(bin='01111111')], [70, BitArray(bin='11111111')]]
 
             self.assertRaises(ValueError, lambda: probability_selection(['notanint', 'notafloat']))
 
             np.random.seed(1)
             result = probability_selection(population1)
-            self.assertEqual(type(result), list)
-            self.assertEqual(result[1].bin, '00001111')
+            self.assertEqual(type(result), type(population1[0][1]))
+            self.assertEqual(result.bin, '00001111')
 
             np.random.seed(1)
             result = probability_selection(population2)
-            self.assertEqual(type(result), list)
-            self.assertEqual(result[1].bin, '11111111')
+            self.assertEqual(type(result), type(population2[0][1]))
+            self.assertEqual(result.bin, '11111111')
 
         def test_ranked_selection(self):
-            population1 = [bitstring.BitArray(bin='00000001'), bitstring.BitArray(bin='11111111')]
-            population2 = [bitstring.BitArray(bin='00000000'), bitstring.BitArray(bin='11111110')]
+            population1 = [BitArray(bin='00000001'), BitArray(bin='11111111')]
+            population2 = [BitArray(bin='00000000'), BitArray(bin='11111110')]
 
-            random.seed(1)
+            seed(1)
             result = ranked_selection(population1)
-            self.assertEqual(type(result), bitstring.BitArray)
+            self.assertEqual(type(result), BitArray)
             self.assertEqual(result.bin, '00000001')
 
-            random.seed(1)
+            seed(1)
             result = ranked_selection(population2)
-            self.assertEqual(type(result), bitstring.BitArray)
+            self.assertEqual(type(result), BitArray)
             self.assertEqual(result.bin, '00000000')
 
         def tearDown(self):

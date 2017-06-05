@@ -72,10 +72,10 @@ if __name__ == '__main__':
             pass
 
         def test_generate_xover(self):
-            population = [bitstring.BitArray(bin='00000001'), bitstring.BitArray(bin='00000011'),
-                          bitstring.BitArray(bin='00000111'), bitstring.BitArray(bin='00001111'),
-                          bitstring.BitArray(bin='00011111'), bitstring.BitArray(bin='00111111'),
-                          bitstring.BitArray(bin='01111111'), bitstring.BitArray(bin='11111111')]
+            population = [BitArray(bin='00000001'), BitArray(bin='00000011'),
+                          BitArray(bin='00000111'), BitArray(bin='00001111'),
+                          BitArray(bin='00011111'), BitArray(bin='00111111'),
+                          BitArray(bin='01111111'), BitArray(bin='11111111')]
 
             self.assertRaises(ValueError, lambda: generate_xover(population, midpoint_dist='error'))
 
@@ -84,16 +84,16 @@ if __name__ == '__main__':
             uniform_xover = generate_xover(population, midpoint_dist='uniform')
             normal_xover = generate_xover(population, midpoint_dist='normal')
 
-            self.assertEqual(type(uniform_xover), bitstring.BitArray)
+            self.assertEqual(type(uniform_xover), BitArray)
             self.assertEqual(uniform_xover.bin, '0011')
-            self.assertEqual(type(normal_xover), bitstring.BitArray)
+            self.assertEqual(type(normal_xover), BitArray)
             self.assertEqual(normal_xover.bin, '00000011')
 
         def test_generate_lmutate(self):
-            population = [bitstring.BitArray(bin='00000001'), bitstring.BitArray(bin='00000011'),
-                          bitstring.BitArray(bin='00000111'), bitstring.BitArray(bin='00001111'),
-                          bitstring.BitArray(bin='00011111'), bitstring.BitArray(bin='00111111'),
-                          bitstring.BitArray(bin='01111111'), bitstring.BitArray(bin='11111111')]
+            population = [BitArray(bin='00000001'), BitArray(bin='00000011'),
+                          BitArray(bin='00000111'), BitArray(bin='00001111'),
+                          BitArray(bin='00011111'), BitArray(bin='00111111'),
+                          BitArray(bin='01111111'), BitArray(bin='11111111')]
 
             self.assertRaises(ValueError, lambda: generate_lmutate(population, locate_dist='error'))
 
@@ -102,16 +102,16 @@ if __name__ == '__main__':
             uniform_lmutate = generate_lmutate(population, locate_dist='uniform')
             normal_lmutate = generate_lmutate(population, locate_dist='normal')
 
-            self.assertEqual(type(uniform_lmutate), bitstring.BitArray)
+            self.assertEqual(type(uniform_lmutate), BitArray)
             self.assertEqual(uniform_lmutate.bin, '01000011')
-            self.assertEqual(type(normal_lmutate), bitstring.BitArray)
+            self.assertEqual(type(normal_lmutate), BitArray)
             self.assertEqual(normal_lmutate.bin, '11111111')
 
         def test_generate_pmutate(self):
-            population = [bitstring.BitArray(bin='00000001'), bitstring.BitArray(bin='00000011'),
-                          bitstring.BitArray(bin='00000111'), bitstring.BitArray(bin='00001111'),
-                          bitstring.BitArray(bin='00011111'), bitstring.BitArray(bin='00111111'),
-                          bitstring.BitArray(bin='01111111'), bitstring.BitArray(bin='11111111')]
+            population = [BitArray(bin='00000001'), BitArray(bin='00000011'),
+                          BitArray(bin='00000111'), BitArray(bin='00001111'),
+                          BitArray(bin='00011111'), BitArray(bin='00111111'),
+                          BitArray(bin='01111111'), BitArray(bin='11111111')]
 
             self.assertRaises(ValueError,
                               lambda: generate_pmutate(population, locate_dist='error', pflip_dist='uniform'))
@@ -126,13 +126,13 @@ if __name__ == '__main__':
             nu_pmutate = generate_pmutate(population, locate_dist='normal', pflip_dist='uniform')
             nn_pmutate = generate_pmutate(population, locate_dist='normal', pflip_dist='normal')
 
-            self.assertEqual(type(uu_pmutate), bitstring.BitArray)
+            self.assertEqual(type(uu_pmutate), BitArray)
             self.assertEqual(uu_pmutate.bin, '10000111')
-            self.assertEqual(type(un_pmutate), bitstring.BitArray)
+            self.assertEqual(type(un_pmutate), BitArray)
             self.assertEqual(un_pmutate.bin, '10011111')
-            self.assertEqual(type(nu_pmutate), bitstring.BitArray)
+            self.assertEqual(type(nu_pmutate), BitArray)
             self.assertEqual(nu_pmutate.bin, '01000001')
-            self.assertEqual(type(nn_pmutate), bitstring.BitArray)
+            self.assertEqual(type(nn_pmutate), BitArray)
             self.assertEqual(nn_pmutate.bin, '00000110')
 
         def tearDown(self):
