@@ -85,7 +85,7 @@ if __name__ == '__main__':
             normal_xover = generate_xover(population, midpoint_dist='normal')
 
             self.assertEqual(type(uniform_xover), BitArray)
-            self.assertEqual(uniform_xover.bin, '0011')
+            self.assertEqual(uniform_xover.bin, '00000011')
             self.assertEqual(type(normal_xover), BitArray)
             self.assertEqual(normal_xover.bin, '00000011')
 

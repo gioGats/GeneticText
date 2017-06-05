@@ -1,9 +1,7 @@
-import numpy as np  # ISSUE Modify tests so we don't need numpy in the project
 from bitstring import BitArray as Ba
 
 from string import ascii_letters
 from random import randint, choices, seed, random
-from os import urandom
 
 
 class BitArray(Ba):
@@ -60,15 +58,18 @@ def midpoint_xover(a, b, midpoint):
     if isinstance(midpoint, float):
         if not 0.0 <= midpoint <= 1.0:
             raise ValueError('Error in midpoint values!')
-        new_sequence = a[0:int(len(a) * midpoint)] + b[int(len(a) * (1 - midpoint)):]
+        new_sequence = a[0:int(len(a) * midpoint)]
+        new_sequence.append(b[int(len(a) * midpoint):])
     elif isinstance(midpoint, int):
         if not 0 <= midpoint <= len(a):
             raise ValueError('Error in midpoint values!')
-        new_sequence = a[0:midpoint] + b[len(b) - midpoint:]
+        new_sequence = a[0:midpoint]
+        new_sequence.append(b[midpoint:])
     else:
         raise TypeError('Midpoint must be float or int, is %s' % str(type(midpoint)))
     if len(new_sequence) != len(a):  # ISSUE This assertion throws an error when ga is run
-        print(a, b, midpoint, new_sequence)
+        # print(a.bin, b.bin, midpoint, new_sequence.bin)
+        raise ValueError('Mismatch in length values!')
     return new_sequence
 
 
@@ -139,7 +140,6 @@ def score_sequence(test, answer):
     :return: float [0,1]; (number of bits in test that match answer)/(number of bits in answer)
     """
     if len(test) != len(answer):
-        print(test.bin, answer.bin)
         raise ValueError('Length mismatch: test(%d) != answer(%d)' % (len(test), len(answer)))
     test_string, answer_string = test.bin, answer.bin
     score = 0
@@ -171,7 +171,8 @@ def probability_selection(pop_score_list):
     if probability_type is "int":
         total = sum(probability_dist)
         probability_dist[:] = [float(x / total) for x in probability_dist]  # FUTURE Vectorize this
-    return pop_score_list[np.random.choice(range(0, len(pop_score_list)), p=probability_dist)][1]
+
+    return pop_score_list[choices(range(0, len(pop_score_list)), weights=probability_dist, k=1)[0]][1]
 
 
 def ranked_selection(population):
@@ -288,15 +289,15 @@ if __name__ == '__main__':
 
             self.assertRaises(ValueError, lambda: probability_selection(['notanint', 'notafloat']))
 
-            np.random.seed(1)
+            seed(1)
             result = probability_selection(population1)
             self.assertEqual(type(result), type(population1[0][1]))
-            self.assertEqual(result.bin, '00001111')
+            self.assertEqual(result.bin, '00000011')
 
-            np.random.seed(1)
+            seed(1)
             result = probability_selection(population2)
             self.assertEqual(type(result), type(population2[0][1]))
-            self.assertEqual(result.bin, '11111111')
+            self.assertEqual(result.bin, '00111111')
 
         def test_ranked_selection(self):
             population1 = [BitArray(bin='00000001'), BitArray(bin='11111111')]
