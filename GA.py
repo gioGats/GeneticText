@@ -4,8 +4,7 @@ from generation_functions import *
 from time import time
 from os import makedirs
 from datetime import datetime
-
-# ISSUE Remove any numpy usages
+from sys import getsizeof
 
 
 class GeneticAlgorithm(object):
@@ -81,7 +80,7 @@ class GeneticAlgorithm(object):
     def best_candidate_score(self):
         return self._current_pop_scores[0]
 
-    def run(self, verbosity=1, max_iterations=float('inf'), max_time=float('inf'), min_convergence=0.0):
+    def run(self, verbosity=1, max_time=float('inf'), min_convergence=0.0):
         if None in [self._target_text, self._target, self._generate_functions, self._current_pop, self._next_pop]:
             raise AttributeError('Initialization attributes must be defined before running genetic algorithm.')
         if not self._generate_functions:  # Default generation functions
@@ -123,7 +122,7 @@ class GeneticAlgorithm(object):
                         f.write(self.best_candidate)
 
             # TERMINATION
-            if iteration_count > max_iterations:  # Max iterations
+            if iteration_count > self._generations:  # Max iterations
                 break
             elif self.best_candidate_score == 1.0:  # Perfection
                 break
@@ -136,7 +135,6 @@ class GeneticAlgorithm(object):
 
 
 if __name__ == '__main__':
-    # TODO Implement a unittest.TestCase for GeneticAlgorithm and test the methods:
     import unittest
 
 
@@ -245,35 +243,20 @@ if __name__ == '__main__':
             # TODO Create an empty array
             # TODO Use ga_utils to fill that array with randoms
             # TODO Can ga_utils functions still pass their tests when given the items from this array?
-            # i.e. Do they fail when given np.array(dtype=np.bool) instead of a bitstring.BitArray?
             self.fail('Not implemented')
 
         def test_ga_utils_performance(self):
-            # TODO Create an empty array
-            # TODO Use ga_utils to fill that array with randoms
-            # Most of these tests can initially just be a printout that we review manually
-            # In the FUTURE automate tests to verify scaled performance meets a scaling standard
-            # TODO Test performance, something akin to:
-            """
-            for function in ga_utils:
-                run that function for every item in the array
-                calculate an estimated runtime per item
-                compare to the runtime of a single bitstring not involving numpy
-                are these comparable?
-            """
-            # TODO Test size performance, something akin to:
-            """
-            define a large collection of bits, a (remember 8,000 bits equals ~1KB, this should probably be ~100KB)
-            turn a into a BitArray, b, measure it's size.
-            turn b into a numpy array, c, measure it's size.
-            drop a into an empty numpy array (dtype=np.bool), d, and measure it's size
-            drop a into an emtpy numpy array (dtype=np.float64), e, and measure it's size
-
-            are b, c, and d comparable in size?
-            is e 8 times the size of d (implying that numpy stores each bit as a byte) or
-            is e 64 times the size of d (implying that numpy stores each bit as a bit)
-            """
-            self.fail('Not implemented')
+            # FUTURE Upgrade to exponential regression for order of growth calculation
+            from random import choices
+            from string import ascii_letters
+            for x in range(11, 16+1):
+                ga = GeneticAlgorithm(pop_size=10, generations=10)
+                ga.set_target(''.join(choices(ascii_letters, k=(2**x))))
+                start = time()
+                ga.run(verbosity=0)
+                this_time = time() - start
+                this_memory = getsizeof(ga)
+                print('Factor: %d | Time %.4f seconds | Memory %.4f GB' % (x, this_time, (this_memory/1000000)))
 
 
     unittest.main(verbosity=2)
