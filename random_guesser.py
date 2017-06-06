@@ -32,7 +32,7 @@ class RandomGuesser(object):
         return self._best_score
 
     def run(self, verbosity=1, max_iterations=float('inf'), max_time=float('inf')):
-        # TODO Finish this function
+        # TODO Ryan: Finish this function
         if None in [self._target_text, self._target]:
             raise AttributeError('Initialization attributes must be defined before running genetic algorithm.')
 
@@ -50,7 +50,7 @@ class RandomGuesser(object):
                 self._best_score = this_score
 
             # REPORTING
-            # TODO Reporting
+            # TODO Ryan: Reporting
 
             # TERMINATION
             if iteration_count > max_iterations:  # Max iterations

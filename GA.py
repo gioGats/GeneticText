@@ -85,7 +85,7 @@ class GeneticAlgorithm(object):
     def best_candidate_score(self):
         return self._current_pop_scores[0]
 
-    def run(self, verbosity=1, max_time=float('inf'), min_convergence=0.0):
+    def run(self, verbosity=1, max_time=float('+inf'), min_convergence=float('-inf')):
         if None in [self._target_text, self._target, self._generate_functions, self._current_pop, self._next_pop]:
             raise AttributeError('Initialization attributes must be defined before running genetic algorithm.')
         if not self._generate_functions:  # Default generation functions
@@ -108,11 +108,14 @@ class GeneticAlgorithm(object):
                 last_best = self.best_candidate_score
                 self._next_pop = []
                 for i in range(self._pop_size):
+                    """ Breakout for testing
                     gen_fn = probability_selection(self._generate_functions)
-                    print(gen_fn.__name__)
+                    # print(gen_fn.__name__)
                     new_birth = gen_fn(self._current_pop)
                     assert(len(new_birth) == self._chromosome_length)
                     self._next_pop.append(new_birth)
+                    """
+                    self._next_pop.append(probability_selection(self._generate_functions)(self._current_pop))
                     # FUTURE Vectorize or parallel
 
                 assert len(self._current_pop) == len(self._next_pop)
@@ -255,8 +258,7 @@ if __name__ == '__main__':
             # TODO Create an empty array
             # TODO Use ga_utils to fill that array with randoms
             # TODO Can ga_utils functions still pass their tests when given the items from this array?
-            #self.fail('Not implemented')
-            pass
+            self.fail('Not implemented')
 
         def test_ga_performance(self):
             # FUTURE Upgrade to exponential regression for order of growth calculation
@@ -264,17 +266,12 @@ if __name__ == '__main__':
             from string import ascii_letters
             for x in range(11, 16+1):
                 ga = GeneticAlgorithm(pop_size=10, generations=10)
-                #ga.set_target(create_random(2**x, bits=False)
-                ga.set_target('abcd')
+                ga.set_target(create_random(2**x, bits=False))
                 start = time()
                 ga.run(verbosity=1)
                 this_time = time() - start
                 this_memory = getsizeof(ga)
-                print('Factor: %d | Time %.4f seconds | Memory %.4f GB' % (x, this_time, (this_memory/1000000)))
+                print(' | Factor: %d | Time %.4f seconds | Memory %.4f MB' % (x, this_time, (this_memory/1000)))
 
 
     unittest.main(verbosity=2)
-
-    ####
-    #ga = GeneticAlgorithm(pop_size=10, generations=10)
-    #ga.set_target(''.join(choices(ascii_letters, k=(2**x))))

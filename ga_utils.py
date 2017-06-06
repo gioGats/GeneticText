@@ -67,7 +67,7 @@ def midpoint_xover(a, b, midpoint):
         new_sequence.append(b[midpoint:])
     else:
         raise TypeError('Midpoint must be float or int, is %s' % str(type(midpoint)))
-    if len(new_sequence) != len(a):  # ISSUE This assertion throws an error when ga is run
+    if len(new_sequence) != len(a):
         # print(a.bin, b.bin, midpoint, new_sequence.bin)
         raise ValueError('Mismatch in length values!')
     return new_sequence

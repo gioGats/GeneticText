@@ -35,7 +35,13 @@ def generate_lmutate(population, locate_dist='uniform'):
         b = max(min(int(gauss(0.5 * len(population[0]), 0.5 * len(population[0]))), len(population[0])), 0)
     else:
         raise ValueError('Location distribution must be uniform or normal')
-    return location_mutation(ranked_selection(population), min(a, b), max(a, b))
+    if a == b:
+        if randint(1, 2) == 1:
+            return location_mutation(ranked_selection(population), a, None)
+        else:
+            return location_mutation(ranked_selection(population), 0, a)
+    else:
+        return location_mutation(ranked_selection(population), min(a, b), max(a, b))
 
 
 def generate_pmutate(population, locate_dist='uniform', pflip_dist='uniform'):
@@ -60,7 +66,13 @@ def generate_pmutate(population, locate_dist='uniform', pflip_dist='uniform'):
         p = max(min(gauss(0.5, 0.5), 1.0), 0.0)
     else:
         raise ValueError('Pflip distribution must be uniform or normal')
-    return probability_mutation(ranked_selection(population), p, min(a, b), max(a, b))
+    if a == b:
+        if randint(1, 2) == 1:
+            return probability_mutation(ranked_selection(population), p, a, None)
+        else:
+            return probability_mutation(ranked_selection(population), p, 0, a)
+    else:
+        return probability_mutation(ranked_selection(population), p, min(a, b), max(a, b))
 
 
 if __name__ == '__main__':
