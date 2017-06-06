@@ -1,6 +1,6 @@
 from bitstring import BitArray as Ba
 
-from string import ascii_letters
+from string import ascii_letters, digits, punctuation
 from random import randint, choices, seed, random
 
 
@@ -27,18 +27,24 @@ def bin_to_str(bin_sequence):
     return bin_sequence.tobytes().decode('utf-8')
 
 
-def create_random(n, bits=True):
+def create_random(n, bytes=True):
     """
     Create a random sequence of length n
     :param n: int
-    :param bits: if True each item is a bit; else each item is a character
+    :param bytes: if True each item is a byte; else each item is a character
     :return: BitArray or str
     """
-    if bits:
-        return BitArray(uint=randint(0, 2**n - 1), length=n)
+    # ISSUE: More of a notice/change review.
+    # Currently the bytes=True path of this method will take a random ascii character and return it in byte form.
+    # This is to counter-act the error of getting sequences of bits not matching up to any ascii character.
+    # As a result, it's more "byte" based than bit based. A 'n' of '2' will essentially return 2 bytes/16 bits instead
+    # of the original 2 bits that don't match any ASCII char.
+    bitstr = ''.join(choices((ascii_letters + digits + punctuation), k=n))
+    if bytes:
+        return BitArray(bytes=str.encode(bitstr))
 
     else:
-        return ''.join(choices(ascii_letters, k=n))  #TODO Add uppercase, numbers, and symbols
+        return bitstr
 
 
 def midpoint_xover(a, b, midpoint):
@@ -207,12 +213,12 @@ if __name__ == '__main__':
             self.assertEqual(bin_to_str(str_to_bin('fubar')), 'fubar')
 
         def test_create_random(self):
-            result = create_random(64, True)
-            self.assertEqual(len(result), 64)
+            result = create_random(1, True)
+            self.assertEqual(len(result), 8)
             self.assertEqual(type(result), BitArray)
 
-            result = create_random(8, False)
-            self.assertEqual(len(result), 8)
+            result = create_random(1, False)
+            self.assertEqual(len(result), 1)
             self.assertEqual(type(result), str)
 
         def test_midpoint_xover(self):
