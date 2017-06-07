@@ -27,24 +27,19 @@ def bin_to_str(bin_sequence):
     return bin_sequence.tobytes().decode('utf-8')
 
 
-def create_random(n, bytes=True):
+def create_random(n, bits=True):
     """
-    Create a random sequence of length n
+    Create a random sequence of n characters
     :param n: int
-    :param bytes: if True each item is a byte; else each item is a character
+    :param bits: return as BitArray, else return str
     :return: BitArray or str
     """
-    # ISSUE: More of a notice/change review.
-    # Currently the bytes=True path of this method will take a random ascii character and return it in byte form.
-    # This is to counter-act the error of getting sequences of bits not matching up to any ascii character.
-    # As a result, it's more "byte" based than bit based. A 'n' of '2' will essentially return 2 bytes/16 bits instead
-    # of the original 2 bits that don't match any ASCII char.
-    bitstr = ''.join(choices((ascii_letters + digits + punctuation), k=n))
-    if bytes:
-        return BitArray(bytes=str.encode(bitstr))
 
+    string = ''.join(choices((ascii_letters + digits + punctuation), k=n))
+    if bits:
+        return str_to_bin(string)
     else:
-        return bitstr
+        return string
 
 
 def midpoint_xover(a, b, midpoint):

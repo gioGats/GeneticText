@@ -102,7 +102,7 @@ class GeneticAlgorithm(object):
                 last_best = 0.0
                 self._current_pop = []
                 for i in range(self._pop_size):
-                    self._current_pop.append(create_random(self._chromosome_length, bytes=True))
+                    self._current_pop.append(create_random(len(self._target_text), bits=True))
                     # FUTURE Vectorize or parallel
             else:
                 last_best = self.best_candidate_score
@@ -255,7 +255,7 @@ if __name__ == '__main__':
             self.assertEqual(type(solution), float)
 
         def test_ga_utils_correctness(self):
-            ga_utils_arr = [create_random(1, bytes=True) for i in range(10)]
+            ga_utils_arr = [create_random(1, bits=True) for i in range(10)]
             ga_utils_scores = []
             selections = []
 
@@ -328,7 +328,7 @@ if __name__ == '__main__':
             from string import ascii_letters
             for x in range(11, 16+1):
                 ga = GeneticAlgorithm(pop_size=10, generations=10)
-                ga.set_target(create_random(2**x, bytes=False))
+                ga.set_target(create_random(2**x, bits=False))
                 start = time()
                 ga.run(verbosity=1)
                 this_time = time() - start
