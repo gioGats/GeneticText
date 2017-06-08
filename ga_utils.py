@@ -3,6 +3,8 @@ from bitstring import BitArray as Ba
 from string import ascii_letters, digits, punctuation
 from random import randint, choices, seed, random
 
+import unittest
+
 
 class BitArray(Ba):
     def __lt__(self, other):
@@ -55,22 +57,22 @@ def midpoint_xover(a, b, midpoint):
     :return: BitArray
     """
     if len(a) != len(b):
-        raise ValueError('Length mismatch!')
+        raise ValueError('Length mismatch: a(%d) != b(%d)' % (len(a), len(b)))
     if isinstance(midpoint, float):
         if not 0.0 <= midpoint <= 1.0:
-            raise ValueError('Error in midpoint values!')
+            raise ValueError('Midpoint must be between 0.0 and 1.0, was %s' % str(midpoint))
         new_sequence = a[0:int(len(a) * midpoint)]
         new_sequence.append(b[int(len(a) * midpoint):])
     elif isinstance(midpoint, int):
         if not 0 <= midpoint <= len(a):
-            raise ValueError('Error in midpoint values!')
+            raise ValueError('Midpoint must be between 0.0 and %s, was %s' % (str(len(a)), str(midpoint)))
         new_sequence = a[0:midpoint]
         new_sequence.append(b[midpoint:])
     else:
         raise TypeError('Midpoint must be float or int, is %s' % str(type(midpoint)))
     if len(new_sequence) != len(a):
         # print(a.bin, b.bin, midpoint, new_sequence.bin)
-        raise ValueError('Mismatch in length values!')
+        raise ValueError('Length mismatch: new_sequence(%d) != a(%d)' % (len(new_sequence), len(a)))
     return new_sequence
 
 
@@ -185,137 +187,134 @@ def ranked_selection(population):
     return population[min(randint(0, len(population) - 1), randint(0, len(population) - 1))]
 
 
+class TestGAUtils(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def test_str_to_bin(self):
+        result = str_to_bin('foobar')
+        self.assertEqual(len(result), 48)
+        self.assertEqual(type(result), BitArray)
+        self.assertEqual(result.bin, '011001100110111101101111011000100110000101110010')
+        self.assertEqual(str_to_bin(bin_to_str(BitArray(bin='01010000'))).bin, '01010000')
+
+    def test_bin_to_str(self):
+        result = bin_to_str(BitArray(bin='011001100110111101101111011000100110000101110010'))
+        self.assertEqual(len(result), 6)
+        self.assertEqual(type(result), str)
+        self.assertEqual(result, 'foobar')
+        self.assertEqual(bin_to_str(str_to_bin('fubar')), 'fubar')
+
+    def test_create_random(self):
+        result = create_random(1, True)
+        self.assertEqual(len(result), 8)
+        self.assertEqual(type(result), BitArray)
+
+        result = create_random(1, False)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(type(result), str)
+
+    def test_midpoint_xover(self):
+        sequence_a = BitArray(bin='00000000')
+        sequence_b = BitArray(bin='11111111')
+
+        self.assertRaises(ValueError, lambda: midpoint_xover(BitArray(bin='000000'),
+                                                             BitArray(bin='00000000'), 0.5))
+
+        self.assertRaises(ValueError, lambda: midpoint_xover(sequence_a, sequence_b, 1.1))
+        self.assertRaises(ValueError, lambda: midpoint_xover(sequence_a, sequence_b, 10))
+
+        result = midpoint_xover(sequence_a, sequence_b, 0.5)
+        self.assertEqual(len(result), 8)
+        self.assertEqual(type(result), BitArray)
+        self.assertEqual(result.bin, '00001111')
+
+        result = midpoint_xover(sequence_a, sequence_b, 4)
+        self.assertEqual(len(result), 8)
+        self.assertEqual(type(result), BitArray)
+        self.assertEqual(result.bin, '00001111')
+
+    def test_location_mutation(self):
+        sequence = BitArray(bin='00000000')
+
+        result = location_mutation(sequence, 0, 4)
+        self.assertEqual(len(result), 8)
+        self.assertEqual(type(result), BitArray)
+        self.assertEqual(result.bin, '11110000')
+
+        result = location_mutation(sequence, 0, 0.5)
+        self.assertEqual(len(result), 8)
+        self.assertEqual(type(result), BitArray)
+        self.assertEqual(result.bin, '11110000')
+
+    def test_probability_mutation(self):
+        sequence = BitArray(bin='00000000')
+
+        seed(1)
+        result = probability_mutation(sequence, 0.5, 0, 4)
+        self.assertEqual(len(result), 8)
+        self.assertEqual(type(result), BitArray)
+        self.assertEqual(result.bin, '01100000')
+
+        seed(1)
+        result = probability_mutation(sequence, 0.5, 0, 0.5)
+        self.assertEqual(len(result), 8)
+        self.assertEqual(type(result), BitArray)
+        self.assertEqual(result.bin, '01100000')
+
+    def test_score_sequence(self):
+        sequence_a = BitArray(bin='00000000')
+        sequence_b = BitArray(bin='11111111')
+        sequence_c = BitArray(bin='00001111')
+
+        self.assertRaises(ValueError, lambda: score_sequence(BitArray(bin='000000'),
+                                                             BitArray(bin='00000000')))
+
+        result = score_sequence(sequence_a, sequence_b)
+        self.assertEqual(type(result), float)
+        self.assertEqual(result, 0)
+
+        result = score_sequence(sequence_b, sequence_c)
+        self.assertEqual(type(result), float)
+        self.assertEqual(result, 0.5)
+
+    def test_probability_selection(self):
+        # FUTURE The function is ambiguous as to the type of the actual value,
+        # but in this case, it will be a function from generation_functions
+        population1 = [[0.1, BitArray(bin='00000001')], [0.1, BitArray(bin='00000011')],
+                       [0.1, BitArray(bin='00000111')], [0.7, BitArray(bin='00001111')]]
+        population2 = [[10, BitArray(bin='00011111')], [10, BitArray(bin='00111111')],
+                       [10, BitArray(bin='01111111')], [70, BitArray(bin='11111111')]]
+
+        self.assertRaises(ValueError, lambda: probability_selection(['notanint', 'notafloat']))
+
+        seed(1)
+        result = probability_selection(population1)
+        self.assertEqual(type(result), type(population1[0][1]))
+        self.assertEqual(result.bin, '00000011')
+
+        seed(1)
+        result = probability_selection(population2)
+        self.assertEqual(type(result), type(population2[0][1]))
+        self.assertEqual(result.bin, '00111111')
+
+    def test_ranked_selection(self):
+        population1 = [BitArray(bin='00000001'), BitArray(bin='11111111')]
+        population2 = [BitArray(bin='00000000'), BitArray(bin='11111110')]
+
+        seed(1)
+        result = ranked_selection(population1)
+        self.assertEqual(type(result), BitArray)
+        self.assertEqual(result.bin, '00000001')
+
+        seed(1)
+        result = ranked_selection(population2)
+        self.assertEqual(type(result), BitArray)
+        self.assertEqual(result.bin, '00000000')
+
+    def tearDown(self):
+        pass
+
+
 if __name__ == '__main__':
-    import unittest
-
-
-    class TestGAUtils(unittest.TestCase):
-        def setUp(self):
-            pass
-
-        def test_str_to_bin(self):
-            result = str_to_bin('foobar')
-            self.assertEqual(len(result), 48)
-            self.assertEqual(type(result), BitArray)
-            self.assertEqual(result.bin, '011001100110111101101111011000100110000101110010')
-            self.assertEqual(str_to_bin(bin_to_str(BitArray(bin='01010000'))).bin, '01010000')
-
-        def test_bin_to_str(self):
-            result = bin_to_str(BitArray(bin='011001100110111101101111011000100110000101110010'))
-            self.assertEqual(len(result), 6)
-            self.assertEqual(type(result), str)
-            self.assertEqual(result, 'foobar')
-            self.assertEqual(bin_to_str(str_to_bin('fubar')), 'fubar')
-
-        def test_create_random(self):
-            result = create_random(1, True)
-            self.assertEqual(len(result), 8)
-            self.assertEqual(type(result), BitArray)
-
-            result = create_random(1, False)
-            self.assertEqual(len(result), 1)
-            self.assertEqual(type(result), str)
-
-        def test_midpoint_xover(self):
-            sequence_a = BitArray(bin='00000000')
-            sequence_b = BitArray(bin='11111111')
-
-            self.assertRaises(ValueError, lambda: midpoint_xover(BitArray(bin='000000'),
-                                                                 BitArray(bin='00000000'), 0.5))
-
-            self.assertRaises(ValueError, lambda: midpoint_xover(sequence_a, sequence_b, 1.1))
-            self.assertRaises(ValueError, lambda: midpoint_xover(sequence_a, sequence_b, 10))
-
-            result = midpoint_xover(sequence_a, sequence_b, 0.5)
-            self.assertEqual(len(result), 8)
-            self.assertEqual(type(result), BitArray)
-            self.assertEqual(result.bin, '00001111')
-
-            result = midpoint_xover(sequence_a, sequence_b, 4)
-            self.assertEqual(len(result), 8)
-            self.assertEqual(type(result), BitArray)
-            self.assertEqual(result.bin, '00001111')
-
-        def test_location_mutation(self):
-            sequence = BitArray(bin='00000000')
-
-            result = location_mutation(sequence, 0, 4)
-            self.assertEqual(len(result), 8)
-            self.assertEqual(type(result), BitArray)
-            self.assertEqual(result.bin, '11110000')
-
-            result = location_mutation(sequence, 0, 0.5)
-            self.assertEqual(len(result), 8)
-            self.assertEqual(type(result), BitArray)
-            self.assertEqual(result.bin, '11110000')
-
-        def test_probability_mutation(self):
-            sequence = BitArray(bin='00000000')
-
-            seed(1)
-            result = probability_mutation(sequence, 0.5, 0, 4)
-            self.assertEqual(len(result), 8)
-            self.assertEqual(type(result), BitArray)
-            self.assertEqual(result.bin, '01100000')
-
-            seed(1)
-            result = probability_mutation(sequence, 0.5, 0, 0.5)
-            self.assertEqual(len(result), 8)
-            self.assertEqual(type(result), BitArray)
-            self.assertEqual(result.bin, '01100000')
-
-        def test_score_sequence(self):
-            sequence_a = BitArray(bin='00000000')
-            sequence_b = BitArray(bin='11111111')
-            sequence_c = BitArray(bin='00001111')
-
-            self.assertRaises(ValueError, lambda: score_sequence(BitArray(bin='000000'),
-                                                                 BitArray(bin='00000000')))
-
-            result = score_sequence(sequence_a, sequence_b)
-            self.assertEqual(type(result), float)
-            self.assertEqual(result, 0)
-
-            result = score_sequence(sequence_b, sequence_c)
-            self.assertEqual(type(result), float)
-            self.assertEqual(result, 0.5)
-
-        def test_probability_selection(self):
-            # FUTURE The function is ambiguous as to the type of the actual value,
-            # but in this case, it will be a function from generation_functions
-            population1 = [[0.1, BitArray(bin='00000001')], [0.1, BitArray(bin='00000011')],
-                           [0.1, BitArray(bin='00000111')], [0.7, BitArray(bin='00001111')]]
-            population2 = [[10, BitArray(bin='00011111')], [10, BitArray(bin='00111111')],
-                           [10, BitArray(bin='01111111')], [70, BitArray(bin='11111111')]]
-
-            self.assertRaises(ValueError, lambda: probability_selection(['notanint', 'notafloat']))
-
-            seed(1)
-            result = probability_selection(population1)
-            self.assertEqual(type(result), type(population1[0][1]))
-            self.assertEqual(result.bin, '00000011')
-
-            seed(1)
-            result = probability_selection(population2)
-            self.assertEqual(type(result), type(population2[0][1]))
-            self.assertEqual(result.bin, '00111111')
-
-        def test_ranked_selection(self):
-            population1 = [BitArray(bin='00000001'), BitArray(bin='11111111')]
-            population2 = [BitArray(bin='00000000'), BitArray(bin='11111110')]
-
-            seed(1)
-            result = ranked_selection(population1)
-            self.assertEqual(type(result), BitArray)
-            self.assertEqual(result.bin, '00000001')
-
-            seed(1)
-            result = ranked_selection(population2)
-            self.assertEqual(type(result), BitArray)
-            self.assertEqual(result.bin, '00000000')
-
-        def tearDown(self):
-            pass
-
-
     unittest.main(verbosity=2)
